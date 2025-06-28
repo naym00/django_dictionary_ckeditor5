@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from help.choice import choice as CHOICE
+# from word import models as MODELS_WORD
 from help.common.generic import ghelp
 
 
@@ -28,3 +29,12 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'{self.username} - {self.is_superuser}'
+    
+# class Userword(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_words')
+#     word = models.ForeignKey(MODELS_WORD.Word, on_delete=models.CASCADE, related_name='word_users')
+#     level = models.ForeignKey(MODELS_WORD.Complexitylevel, on_delete=models.SET_NULL, null=True, blank=True, related_name='level_words')
+#     created_at = models.DateTimeField(auto_now_add=True)
+    
+#     def __str__(self):
+#         return f'{self.id} - {self.user.username}'

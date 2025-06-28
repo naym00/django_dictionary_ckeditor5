@@ -1,6 +1,5 @@
 from django.db import models
 from user import models as MODELS_USER
-from passage import models as MODELS_PASS
 
 class Complexitylevel(models.Model):
     text = models.CharField(max_length=50, unique=True)
@@ -10,11 +9,11 @@ class Complexitylevel(models.Model):
         return f'{self.id} - {self.difficulty_level} - {self.text}'
 
 class Word(models.Model):
-    user = models.ForeignKey(MODELS_USER.User, on_delete=models.SET_NULL, blank=True, null=True, related_name='user_words')
-    passage = models.ForeignKey(MODELS_PASS.Passage, on_delete=models.SET_NULL, blank=True, null=True, related_name='user_passages')
+    # user = models.ForeignKey(MODELS_USER.User, on_delete=models.SET_NULL, blank=True, null=True, related_name='user_words')
     text = models.CharField(max_length=100)
     pronunciation = models.CharField(max_length=100, blank=True, null=True)
-    level = models.ForeignKey(Complexitylevel, on_delete=models.SET_NULL, null=True, blank=True, related_name='level_words')
+    # level = models.ForeignKey(Complexitylevel, on_delete=models.SET_NULL, null=True, blank=True, related_name='level_words')
+    added_by = models.ForeignKey(MODELS_USER.User, on_delete=models.SET_NULL, blank=True, null=True, related_name='added_by_word')
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
