@@ -11,11 +11,18 @@ class Complexitylevelserializer(serializers.ModelSerializer):
 class Wordserializer(serializers.ModelSerializer):
     meanings = Wordmeaningserializer(many=True)
     examples = Exampleserializer(many=True)
-    level = Complexitylevelserializer(many=False)
-    date_time = serializers.SerializerMethodField('format_datetime')
     
-    def format_datetime(self, instance):
-        return instance.created_at 
     class Meta:
         model = MODELS_WORD.Word
+        fields='__all__'
+
+class Userwordserializer(serializers.ModelSerializer):
+    word = Wordserializer(many=False)
+    level = Complexitylevelserializer(many=False)
+    date_time = serializers.SerializerMethodField('format_datetime')
+
+    def format_datetime(self, instance):
+        return instance.created_at
+    class Meta:
+        model = MODELS_WORD.Userword
         fields='__all__'

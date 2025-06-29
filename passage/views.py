@@ -1,10 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from passage.serializers.GET import serializer as SR_PASS
-from word_meaning import models as MODELS_MEAN
+from word.serializers.GET import serializer as SR_WORD
 from django.shortcuts import render, redirect
-from example import models as MODELS_EXAM
 from passage import models as MODELS_PASS
 from passage import forms as FORMS_PASS
+from word import models as MODELS_WORD
 from help.common.generic import ghelp
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
@@ -16,6 +16,8 @@ def get_passages(request):
         'nav_links': {
             'auth': {
                 'home': ghelp.nav_links(key='home', user=request.user),
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
                 'word_details': ghelp.nav_links(key='word_details'),
                 'logout': ghelp.nav_links(key='logout')
@@ -40,6 +42,8 @@ def add_passage(request):
         'nav_links': {
             'auth': {
                 'home': ghelp.nav_links(key='home', user=request.user),
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
                 'word_details': ghelp.nav_links(key='word_details'),
                 'logout': ghelp.nav_links(key='logout')
@@ -72,7 +76,8 @@ def get_passage_using_id(request, id=None):
         'nav_links': {
             'auth': {
                 'home': ghelp.nav_links(key='home', user=request.user),
-                'passage': ghelp.nav_links(key='passage'),
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
                 'word_details': ghelp.nav_links(key='word_details'),
                 'logout': ghelp.nav_links(key='logout')
@@ -83,6 +88,7 @@ def get_passage_using_id(request, id=None):
                 'register': ghelp.nav_links(key='register'),
             }
         },
+        'level': SR_WORD.Complexitylevelserializer(MODELS_WORD.Complexitylevel.objects.all(), many=True).data,
         'passage': SR_PASS.Passageserializer(MODELS_PASS.Passage.objects.get(id=id), many=False).data,
     }
     return render(request, html_path, context=context)

@@ -11,4 +11,5 @@ urlpatterns = [
     path('add-word/', views.add_word, name='add-word'),
     path('edit-word/<int:id>/', views.edit_word, name='edit-word'),
     path('delete-word/<int:id>/', views.delete_word, name='delete-word'),
+    path('edit-word-complexity-level/<int:id>/', views.edit_word_complexity_level, name='edit-word-complexity-level'),
 ]

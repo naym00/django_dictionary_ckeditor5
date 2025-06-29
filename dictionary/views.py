@@ -15,7 +15,8 @@ def home(request):
         'nav_links': {
             'auth': {
                 'home': ghelp.nav_links(key='home', user=request.user),
-                'passage': ghelp.nav_links(key='passage'),
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
                 'word_details': ghelp.nav_links(key='word_details'),
                 'logout': ghelp.nav_links(key='logout')

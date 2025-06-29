@@ -46,7 +46,8 @@ class N(O):
             'medium_words': {'level': 'Medium', 'link': '/word/medium-words'},
             'hard_words': {'level': 'Hard', 'link': '/word/hard-words'},
             'new_words': {'level': 'New Words', 'link': '/word/new-words'},
-            'passage': {'level': 'Passage', 'link': '/passage/get-passages'},
+            'view_passage': {'level': 'View Passage', 'link': '/passage/get-passages'},
+            'add_passage': {'level': 'Add Passage', 'link': '/passage/add-passage'},
         }
         return links[key] if key in links else '#'
     

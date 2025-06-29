@@ -3,5 +3,6 @@ from word import models as MODELS_WORD
 
 admin.site.register([
     MODELS_WORD.Complexitylevel,
-    MODELS_WORD.Word
+    MODELS_WORD.Word,
+    MODELS_WORD.Userword
 ])
