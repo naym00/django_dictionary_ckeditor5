@@ -151,8 +151,9 @@ def edit_word_complexity_level(request, id=None):
 def add_word_from_passage(request, passageid=None):
     if request.method == 'POST':
         text = request.POST.get('text')
-        meaning = request.POST.get('meaning')
+        meaning = request.POST.get('meaning').strip()
         difficult_level = int(request.POST.get('difficult_level'))
+        
         
         word_instance = MODELS_WORD.Word.objects.filter(text=text.strip().capitalize())
         if word_instance.exists(): word_instance = word_instance.first()
@@ -161,7 +162,18 @@ def add_word_from_passage(request, passageid=None):
                 text=text.strip().capitalize(),
                 added_by=request.user
             )
-        MODELS_MEAN.Wordmeaning.objects.create(text=meaning, word=word_instance)
-        MODELS_WORD.Userword.objects.create(user=request.user, word=word_instance, level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level))
-        MODELS_PASS.Passageword.objects.create(word=word_instance, passage=MODELS_PASS.Passage.objects.get(id=passageid))
-    return redirect('get-passage-using-id', id=passageid)
+        wordmeaning = word_instance.meanings.filter(text=meaning)
+        if not wordmeaning.exists():
+            MODELS_MEAN.Wordmeaning.objects.create(text=meaning, word=word_instance)
+        
+        userword = request.user.user_words.filter(word=word_instance)
+        if not userword.exists():
+            MODELS_WORD.Userword.objects.create(user=request.user, word=word_instance, level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level))
+        else:
+            if userword.first().level.id != difficult_level:
+                userword.update(level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level))
+        
+        passageword = word_instance.word_passages.filter(passage=passageid)
+        if not passageword.exists():
+            MODELS_PASS.Passageword.objects.create(word=word_instance, passage=MODELS_PASS.Passage.objects.get(id=passageid))
+    return redirect('get-passage-using-id', passageid=passageid)

@@ -51,5 +51,39 @@
 {% endblock %}
 
 {% block body %}
-<h1>Home Page</h1>
+  <h1>Home Page</h1>
+  {% if user.is_authenticated  %}
+    <div class="d-flex justify-content-between flex-wrap mt-3">
+      {% for friend_request in friend_requests %}
+        <div class="d-flex flex-column bg-light rounded">
+          <div class="d-flex justify-content-center align-items-center">
+            <span class="fs-3 fw-bold">{{friend_request.user.full_name}}</span>
+          </div>
+          <div class="d-flex justify-content-center align-items-center">
+            <a style="text-decoration: none;" href="/user/accept-friend-request/{{friend_request.user.id}}">Accept Request</a>
+          </div>
+          <div class="d-flex justify-content-center align-items-center">
+            <a style="text-decoration: none;" href="/user/delete-friend-request/{{friend_request.user.id}}">Delete Request</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+
+
+    <div class="d-flex justify-content-between flex-wrap mt-3">
+      {% for potential_friend in potential_friends %}
+        <div class="d-flex flex-column bg-light rounded">
+          <div class="d-flex justify-content-center align-items-center">
+            <span class="fs-3 fw-bold">{{potential_friend.full_name}}</span>
+          </div>
+          <div class="d-flex justify-content-center align-items-center">
+            <a style="text-decoration: none;" href="/user/send-friend-request/{{potential_friend.id}}">Send Friend Request</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <h1>To Explore Login.</h1>
+  {% endif %}
 {% endblock %}

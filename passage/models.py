@@ -17,6 +17,8 @@ class Passageword(models.Model):
     passage = models.ForeignKey(Passage, on_delete=models.CASCADE, related_name='passage_words')
     created_at = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['word', 'passage'], name='passageword_word_passage')]
     def __str__(self):
         return f'{self.id} - {self.passage.title}'
 
@@ -25,5 +27,7 @@ class Userpassage(models.Model):
     passage = models.ForeignKey(Passage, on_delete=models.CASCADE, related_name='passage_users')
     created_at = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['user', 'passage'], name='passageword_user_passage')]
     def __str__(self):
         return f'{self.id} - {self.user.username} - {self.passage.title}'

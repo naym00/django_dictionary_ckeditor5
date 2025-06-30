@@ -26,5 +26,8 @@ def home(request):
                 'register': ghelp.nav_links(key='register'),
             }
         },
+        'potential_friends': ghelp.users_to_send_friend_request(MODELS_USER.User, MODELS_USER.Userfriend, MODELS_USER.Friendrequest, request.user) if request.user.is_authenticated else [],
+        'friend_requests': request.user.requested_to_users.all() if request.user.is_authenticated else []
     }
+    
     return render(request, html_path, context=context)

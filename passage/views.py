@@ -68,8 +68,15 @@ def add_passage(request):
     return render(request, html_path, context=context)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
-def get_passage_using_id(request, id=None):
+def get_passage_using_id(request, passageid=None):
     html_path = 'dictionary/passage/passage_using_id.html'
+    passage = MODELS_PASS.Passage.objects.get(id=passageid)
+    
+    # userwords = MODELS_WORD.Userword.objects.filter(
+    #     user=request.user,  # Filter for logged-in user
+    #     word__word_passages__passage_id=passageid  # Filter for words in the passage
+    # ).distinct().order_by('-id')
+    
     context = {
         'title': 'Single Passage',
         'user': request.user,
@@ -89,6 +96,17 @@ def get_passage_using_id(request, id=None):
             }
         },
         'level': SR_WORD.Complexitylevelserializer(MODELS_WORD.Complexitylevel.objects.all(), many=True).data,
-        'passage': SR_PASS.Passageserializer(MODELS_PASS.Passage.objects.get(id=id), many=False).data,
+        'passage': passage,
+        'words': SR_WORD.Userwordserializer(
+            request.user.user_words.filter(
+                word__word_passages__passage_id=passageid
+            ).distinct().order_by('-id'),
+            many=True
+        ).data
     }
     return render(request, html_path, context=context)
+
+@login_required(login_url=ghelp.nav_links(key='login')['link'])
+def remove_passage_from_my_list(request, passageid=None):
+    request.user.user_passages.filter(passage=passageid).delete()
+    return redirect('get-passages')
