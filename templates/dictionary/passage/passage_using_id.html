@@ -35,7 +35,7 @@
 
         <div>
             <div class="d-flex">
-                <form method="POST" action="{% url 'add-word' %}" class="form-inline w-100 d-flex justify-content-between">
+                <form method="POST" action="{% url 'add-word-from-passage' passage.id %}" class="form-inline w-100 d-flex justify-content-between">
                     {% csrf_token %}
                     <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
                     <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="meaning" placeholder="Meaning" required>

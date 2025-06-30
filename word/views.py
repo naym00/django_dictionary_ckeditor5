@@ -4,6 +4,7 @@ from word_meaning import models as MODELS_MEAN
 from django.shortcuts import render, redirect
 from example import models as MODELS_EXAM
 from word import models as MODELS_WORD
+from passage import models as MODELS_PASS
 from settings import models as MODELS_SETT
 from help.common.generic import ghelp
 
@@ -144,3 +145,23 @@ def edit_word_complexity_level(request, id=None):
         if difficult_level:
             MODELS_WORD.Userword.objects.filter(id=id).update(level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level))
     return redirect('preview-words')
+
+
+@login_required(login_url=ghelp.nav_links(key='login')['link'])
+def add_word_from_passage(request, passageid=None):
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        meaning = request.POST.get('meaning')
+        difficult_level = int(request.POST.get('difficult_level'))
+        
+        word_instance = MODELS_WORD.Word.objects.filter(text=text.strip().capitalize())
+        if word_instance.exists(): word_instance = word_instance.first()
+        else:
+            word_instance = MODELS_WORD.Word.objects.create(
+                text=text.strip().capitalize(),
+                added_by=request.user
+            )
+        MODELS_MEAN.Wordmeaning.objects.create(text=meaning, word=word_instance)
+        MODELS_WORD.Userword.objects.create(user=request.user, word=word_instance, level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level))
+        MODELS_PASS.Passageword.objects.create(word=word_instance, passage=MODELS_PASS.Passage.objects.get(id=passageid))
+    return redirect('get-passage-using-id', id=passageid)
