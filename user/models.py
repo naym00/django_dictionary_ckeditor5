@@ -43,7 +43,7 @@ class Userfriend(models.Model):
 class Friendrequest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_requested_tos')
     requested_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='requested_to_users')
-    # status = models.CharField(max_length=10, choices=ghelp.list_to_tuple(CHOICE.STATUS))
+    request_message = models.CharField(max_length=200, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:

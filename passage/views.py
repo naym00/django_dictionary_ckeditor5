@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from passage import models as MODELS_PASS
 from passage import forms as FORMS_PASS
 from word import models as MODELS_WORD
+from user import models as MODELS_USER
 from help.common.generic import ghelp
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
@@ -29,6 +30,9 @@ def get_passages(request):
             }
         },
         'passages': SR_PASS.Passageserializer(MODELS_PASS.Passage.objects.filter(passage_users__user=request.user).order_by('-id'), many=True).data,
+        'friends_passages': MODELS_PASS.Userpassage.objects.filter(
+                            user__in=list(MODELS_USER.Userfriend.objects.filter(user=request.user).values_list('friend', flat=True)) + list(MODELS_USER.Userfriend.objects.filter(friend=request.user).values_list('user', flat=True))
+                        ).select_related('passage', 'user')
     }
     return render(request, html_path, context=context)
 
@@ -109,4 +113,9 @@ def get_passage_using_id(request, passageid=None):
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def remove_passage_from_my_list(request, passageid=None):
     request.user.user_passages.filter(passage=passageid).delete()
+    return redirect('get-passages')
+
+@login_required(login_url=ghelp.nav_links(key='login')['link'])
+def add_passage_to_your_list(request, passageid=None):
+    MODELS_PASS.Userpassage.objects.create(user=request.user, passage=MODELS_PASS.Passage.objects.get(id=passageid))
     return redirect('get-passages')

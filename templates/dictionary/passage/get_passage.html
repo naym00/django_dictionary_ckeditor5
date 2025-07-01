@@ -55,34 +55,64 @@
 
 {% block body %}
     {% if user.is_authenticated  %}
-        {% if passages %}
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col">Title</th>
-                        {% comment %} <th scope="col">Content</th> {% endcomment %}
-                        <th scope="col">Created At</th>
-                        <th scope="col">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for passage in passages %}
-                        <tr>
-                            <td>
-                                <a style="text-decoration: none;" href="/passage/get-passage-using-id/{{passage.id}}">{{passage.title}}</a>
-                            </td>
-                            {% comment %} <td>{{passage.content|make_it_short:20}}</td> {% endcomment %}
-                            <td>{{passage.created_at}}</td>
-                            <td>
-                                <a style="text-decoration: none;" href="/passage/remove-passage-from-my-list/{{passage.id}}">Remove From List</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <h1>No passage is available.</h1>
-        {% endif %}
+        <div class="d-flex flex-row">
+            <div class="d-flex justify-content-center align-items-center">
+                {% if passages %}
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Title</th>
+                                {% comment %} <th scope="col">Content</th> {% endcomment %}
+                                <th scope="col">Created At</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for passage in passages %}
+                                <tr>
+                                    <td>
+                                        <a style="text-decoration: none;" href="/passage/get-passage-using-id/{{passage.id}}">{{passage.title}}</a>
+                                    </td>
+                                    <td>{{passage.created_at}}</td>
+                                    <td>
+                                        <a style="text-decoration: none;" href="/passage/remove-passage-from-my-list/{{passage.id}}">Remove From List</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <h1>No passage is available.</h1>
+                {% endif %}
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
+                {% if friends_passages %}
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Title</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for friends_passage in friends_passages %}
+                                <tr>
+                                    <td>
+                                        <a style="text-decoration: none;" href="/passage/get-passage-using-id/{{passage.id}}">{{friends_passage.passage.title}}</a>
+                                    </td>
+                                    <td>
+                                        <a style="text-decoration: none;" href="/passage/add-passage-to-your-list/{{friends_passage.passage.id}}">Add To Your Passage List</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <h1>Suggessions are not available.</h1>
+                {% endif %}
+            </div>
+        </div>
+        
     {% else %}
         <h1>Login First</h1>
     {% endif %}

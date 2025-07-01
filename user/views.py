@@ -8,7 +8,11 @@ from rest_framework import status
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def send_friend_request(request, requested_to_id=None):
-    MODELS_USER.Friendrequest.objects.create(user=request.user, requested_to=MODELS_USER.User.objects.get(id=requested_to_id))
+    if request.method == 'POST':
+        prepare_data = {'user': request.user, 'requested_to': MODELS_USER.User.objects.get(id=requested_to_id)}
+        request_message = request.POST.get('request_message')
+        if request_message: prepare_data.update({'request_message': request_message})
+        MODELS_USER.Friendrequest.objects.create(**prepare_data)
     return redirect('home')
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])

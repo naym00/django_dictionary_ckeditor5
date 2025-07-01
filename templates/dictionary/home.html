@@ -60,6 +60,11 @@
             <span class="fs-3 fw-bold">{{friend_request.user.full_name}}</span>
           </div>
           <div class="d-flex justify-content-center align-items-center">
+            <div style="width:210px;">
+              <span>{{friend_request.request_message}}</span>
+            </div>
+          </div>
+          <div class="d-flex justify-content-center align-items-center">
             <a style="text-decoration: none;" href="/user/accept-friend-request/{{friend_request.user.id}}">Accept Request</a>
           </div>
           <div class="d-flex justify-content-center align-items-center">
@@ -77,9 +82,16 @@
           <div class="d-flex justify-content-center align-items-center">
             <span class="fs-3 fw-bold">{{potential_friend.full_name}}</span>
           </div>
-          <div class="d-flex justify-content-center align-items-center">
-            <a style="text-decoration: none;" href="/user/send-friend-request/{{potential_friend.id}}">Send Friend Request</a>
-          </div>
+          <form method="POST" action="{% url 'send-friend-request' potential_friend.id %}" class="d-inline d-flex flex-column">
+            {% csrf_token %}
+            <div class="d-flex justify-content-center align-items-center">
+              {% comment %} <input class="transparent-input fw-bold" style="width: 150px;" type="text" name="request_message"> {% endcomment %}
+              <textarea class="transparent-input fw-bold" style="width: 150px;" rows="2" name="request_message"></textarea>
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
+              <button type="submit" style="border: none; background-color: transparent; cursor: pointer;">Send Friend Request</button>
+            </div>
+          </form>
         </div>
       {% endfor %}
     </div>
