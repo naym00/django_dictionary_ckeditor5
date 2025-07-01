@@ -102,8 +102,8 @@ def add_word(request):
                 pronunciation= pronunciation.strip() if pronunciation != '' else None,
                 added_by=request.user
             )
-        if example != '': MODELS_EXAM.Example.objects.create(sentence=example.strip().capitalize(), word=word_instance)
-        MODELS_MEAN.Wordmeaning.objects.create(text=meaning, word=word_instance)
+        if example != '': MODELS_EXAM.Example.objects.create(sentence=example.strip().capitalize(), word=word_instance, added_by=request.user)
+        MODELS_MEAN.Wordmeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
 
         user_word = request.user.user_words.filter(word=word_instance)
         if user_word.exists():
@@ -164,7 +164,7 @@ def add_word_from_passage(request, passageid=None):
             )
         wordmeaning = word_instance.meanings.filter(text=meaning)
         if not wordmeaning.exists():
-            MODELS_MEAN.Wordmeaning.objects.create(text=meaning, word=word_instance)
+            MODELS_MEAN.Wordmeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
         
         userword = request.user.user_words.filter(word=word_instance)
         if not userword.exists():

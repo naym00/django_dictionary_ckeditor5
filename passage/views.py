@@ -10,6 +10,7 @@ from help.common.generic import ghelp
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def get_passages(request):
+    
     html_path = 'dictionary/passage/get_passage.html'
     context = {
         'title': 'Passage',
@@ -31,8 +32,8 @@ def get_passages(request):
         },
         'passages': SR_PASS.Passageserializer(MODELS_PASS.Passage.objects.filter(passage_users__user=request.user).order_by('-id'), many=True).data,
         'friends_passages': MODELS_PASS.Userpassage.objects.filter(
-                            user__in=list(MODELS_USER.Userfriend.objects.filter(user=request.user).values_list('friend', flat=True)) + list(MODELS_USER.Userfriend.objects.filter(friend=request.user).values_list('user', flat=True))
-                        ).select_related('passage', 'user')
+                            user__in=ghelp.get_friends(MODELS_USER.Userfriend, request.user)
+                        ).exclude(passage__in=request.user.user_passages.all().values_list('passage', flat=True)).select_related('passage', 'user')
     }
     return render(request, html_path, context=context)
 

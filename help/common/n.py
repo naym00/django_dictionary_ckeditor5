@@ -1,5 +1,6 @@
 from django.core.mail import EmailMessage
 from datetime import datetime, date, timedelta
+from django.db.models import Q
 from help.common.o import O
 import pytz
 
@@ -51,4 +52,6 @@ class N(O):
         }
         return links[key] if key in links else '#'
     
+    def get_friends(self, Userfriend, loggedin_user):
+        return [user_id for pair in Userfriend.objects.filter(Q(user=loggedin_user) | Q(friend=loggedin_user)).values('user', 'friend') for user_id in pair.values() if user_id != loggedin_user.id]
     
