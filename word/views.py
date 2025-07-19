@@ -148,8 +148,10 @@ def edit_word_complexity_level(request, id=None):
 
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
-def add_word_from_passage(request, passageid=None):
+def add_word_from_passage(request, user_passage_id=None):
     if request.method == 'POST':
+        user_passage = MODELS_PASS.Userpassage.objects.get(id=user_passage_id)
+        
         text = request.POST.get('text')
         meaning = request.POST.get('meaning').strip()
         difficult_level = int(request.POST.get('difficult_level'))
@@ -173,7 +175,7 @@ def add_word_from_passage(request, passageid=None):
             if userword.first().level.id != difficult_level:
                 userword.update(level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level))
         
-        passageword = word_instance.word_passages.filter(passage=passageid)
+        passageword = word_instance.word_passages.filter(passage=user_passage.passage.id)
         if not passageword.exists():
-            MODELS_PASS.Passageword.objects.create(word=word_instance, passage=MODELS_PASS.Passage.objects.get(id=passageid))
-    return redirect('get-passage-using-id', passageid=passageid)
+            MODELS_PASS.Passageword.objects.create(word=word_instance, passage=MODELS_PASS.Passage.objects.get(id=user_passage.passage.id))
+    return redirect('get-passage-using-id', user_passage_id=user_passage_id)

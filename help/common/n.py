@@ -55,3 +55,5 @@ class N(O):
     def get_friends(self, Userfriend, loggedin_user):
         return [user_id for pair in Userfriend.objects.filter(Q(user=loggedin_user) | Q(friend=loggedin_user)).values('user', 'friend') for user_id in pair.values() if user_id != loggedin_user.id]
     
+    def get_fields_name(self, model):
+        return [field.name for field in model._meta.get_fields()]

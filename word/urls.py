@@ -13,5 +13,5 @@ urlpatterns = [
     path('delete-word/<int:id>/', views.delete_word, name='delete-word'),
     path('edit-word-complexity-level/<int:id>/', views.edit_word_complexity_level, name='edit-word-complexity-level'),
 
-    path('add-word-from-passage/<int:passageid>/', views.add_word_from_passage, name='add-word-from-passage'),
+    path('add-word-from-passage/<int:user_passage_id>/', views.add_word_from_passage, name='add-word-from-passage'),
 ]

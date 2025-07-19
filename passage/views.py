@@ -10,7 +10,6 @@ from help.common.generic import ghelp
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def get_passages(request):
-    
     html_path = 'dictionary/passage/get_passage.html'
     context = {
         'title': 'Passage',
@@ -30,7 +29,7 @@ def get_passages(request):
                 'register': ghelp.nav_links(key='register'),
             }
         },
-        'passages': SR_PASS.Passageserializer(MODELS_PASS.Passage.objects.filter(passage_users__user=request.user).order_by('-id'), many=True).data,
+        'passages': MODELS_PASS.Userpassage.objects.filter(user=request.user).order_by('-id'),
         'friends_passages': MODELS_PASS.Userpassage.objects.filter(
                             user__in=ghelp.get_friends(MODELS_USER.Userfriend, request.user)
                         ).exclude(passage__in=request.user.user_passages.all().values_list('passage', flat=True)).select_related('passage', 'user')
@@ -68,19 +67,52 @@ def add_passage(request):
             content = form.cleaned_data['content']
             instance = MODELS_PASS.Passage.objects.create(title=title, content=content, added_by=request.user)
             
-            MODELS_PASS.Userpassage.objects.create(user=request.user, passage=instance)
+            MODELS_PASS.Userpassage.objects.create(user=request.user, passage=instance, title=title, content=content)
             return redirect('get-passages')
     return render(request, html_path, context=context)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
-def get_passage_using_id(request, passageid=None):
-    html_path = 'dictionary/passage/passage_using_id.html'
-    passage = MODELS_PASS.Passage.objects.get(id=passageid)
+def edit_passage(request, user_passage_id=None):
+    html_path = 'dictionary/passage/edit_passage.html'
+    user_passage = MODELS_PASS.Userpassage.objects.get(id=user_passage_id)
     
-    # userwords = MODELS_WORD.Userword.objects.filter(
-    #     user=request.user,  # Filter for logged-in user
-    #     word__word_passages__passage_id=passageid  # Filter for words in the passage
-    # ).distinct().order_by('-id')
+    context = {
+        'title': 'Edit Passage',
+        'user': request.user,
+        'nav_links': {
+            'auth': {
+                'home': ghelp.nav_links(key='home', user=request.user),
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
+                'words': ghelp.nav_links(key='words'),
+                'word_details': ghelp.nav_links(key='word_details'),
+                'logout': ghelp.nav_links(key='logout')
+            },
+            'unauth': {
+                'home': ghelp.nav_links(key='home'),
+                'login': ghelp.nav_links(key='login'),
+                'register': ghelp.nav_links(key='register'),
+            }
+        },
+        'passage': user_passage,
+        'form': FORMS_PASS.CreatePassageForm(initial={
+            'title': user_passage.title,
+            'content': user_passage.content
+        })
+    }
+    if request.method == 'POST':
+        form = FORMS_PASS.CreatePassageForm(request.POST)
+        if form.is_valid():
+            user_passage.title=form.cleaned_data['title']
+            user_passage.content=form.cleaned_data['content']
+            user_passage.save()
+            return redirect('get-passage-using-id', user_passage_id=user_passage_id)
+    return render(request, html_path, context=context)
+
+@login_required(login_url=ghelp.nav_links(key='login')['link'])
+def get_passage_using_id(request, user_passage_id=None):
+    html_path = 'dictionary/passage/passage_using_id.html'
+    user_passage = MODELS_PASS.Userpassage.objects.get(id=user_passage_id)
     
     context = {
         'title': 'Single Passage',
@@ -101,10 +133,10 @@ def get_passage_using_id(request, passageid=None):
             }
         },
         'level': SR_WORD.Complexitylevelserializer(MODELS_WORD.Complexitylevel.objects.all(), many=True).data,
-        'passage': passage,
+        'passage': user_passage,
         'words': SR_WORD.Userwordserializer(
             request.user.user_words.filter(
-                word__word_passages__passage_id=passageid
+                word__word_passages__passage_id=user_passage.passage.id
             ).distinct().order_by('-id'),
             many=True
         ).data
@@ -112,11 +144,12 @@ def get_passage_using_id(request, passageid=None):
     return render(request, html_path, context=context)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
-def remove_passage_from_my_list(request, passageid=None):
-    request.user.user_passages.filter(passage=passageid).delete()
+def remove_passage_from_my_list(request, user_passage_id=None):
+    MODELS_PASS.Userpassage.objects.get(id=user_passage_id).delete()
     return redirect('get-passages')
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def add_passage_to_your_list(request, passageid=None):
-    MODELS_PASS.Userpassage.objects.create(user=request.user, passage=MODELS_PASS.Passage.objects.get(id=passageid))
+    passage=MODELS_PASS.Passage.objects.get(id=passageid)
+    MODELS_PASS.Userpassage.objects.create(user=request.user, passage=passage, title=passage.title, content=passage.content)
     return redirect('get-passages')

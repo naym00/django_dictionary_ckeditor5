@@ -25,9 +25,12 @@ class Passageword(models.Model):
 class Userpassage(models.Model):
     user = models.ForeignKey(MODELS_USER.User, on_delete=models.CASCADE, related_name='user_passages')
     passage = models.ForeignKey(Passage, on_delete=models.CASCADE, related_name='passage_users')
+    title = models.CharField(max_length=100)
+    content = CKEditor5Field(config_name='extends')
+    # share_status = models.CharField(max_length=15, choices=())
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         constraints = [models.UniqueConstraint(fields=['user', 'passage'], name='passageword_user_passage')]
     def __str__(self):
-        return f'{self.id} - {self.user.username} - {self.passage.title}'
+        return f'{self.id} - {self.user.username} - {self.title}'
