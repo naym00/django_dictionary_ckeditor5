@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from passage.serializers.GET import serializer as SR_PASS
 from word.serializers.GET import serializer as SR_WORD
 from django.shortcuts import render, redirect
 from passage import models as MODELS_PASS
@@ -30,9 +29,7 @@ def get_passages(request):
             }
         },
         'passages': MODELS_PASS.Userpassage.objects.filter(user=request.user).order_by('-id'),
-        'friends_passages': MODELS_PASS.Userpassage.objects.filter(
-                            user__in=ghelp.get_friends(MODELS_USER.Userfriend, request.user)
-                        ).exclude(passage__in=request.user.user_passages.all().values_list('passage', flat=True)).select_related('passage', 'user')
+        'preview_passages': ghelp.get_passages_to_display(MODELS_USER.Userfriend, MODELS_PASS.Userpassage, request.user)
     }
     return render(request, html_path, context=context)
 
@@ -101,13 +98,24 @@ def edit_passage(request, user_passage_id=None):
         })
     }
     if request.method == 'POST':
-        form = FORMS_PASS.CreatePassageForm(request.POST)
-        if form.is_valid():
-            user_passage.title=form.cleaned_data['title']
-            user_passage.content=form.cleaned_data['content']
-            user_passage.save()
-            return redirect('get-passage-using-id', user_passage_id=user_passage_id)
+        if user_passage.user == request.user:
+            form = FORMS_PASS.CreatePassageForm(request.POST)
+            if form.is_valid():
+                user_passage.title=form.cleaned_data['title']
+                user_passage.content=form.cleaned_data['content']
+                user_passage.save()
+                return redirect('get-passage-using-id', user_passage_id=user_passage_id)
+        else: return redirect('get-passage-using-id', user_passage_id=user_passage_id)
     return render(request, html_path, context=context)
+
+@login_required(login_url=ghelp.nav_links(key='login')['link'])
+def reset_passage(request, user_passage_id=None):
+    user_passage = MODELS_PASS.Userpassage.objects.get(id=user_passage_id)
+    if user_passage.user == request.user:
+        user_passage.title=user_passage.passage.title
+        user_passage.content=user_passage.passage.content
+        user_passage.save()
+    return redirect('get-passage-using-id', user_passage_id=user_passage_id)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def get_passage_using_id(request, user_passage_id=None):

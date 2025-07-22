@@ -1,3 +1,3 @@
 GENDER=['Male', 'Female', 'Other']
 STATUS=['Pending', 'Accepted', 'Rejected']
-# PASSAGE_SHARE_STATUS=['Public', 'Friend', 'Private']
+SHARE_TO_USER=['Public', 'Friend', 'Custom', 'Private']

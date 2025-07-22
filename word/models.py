@@ -24,7 +24,7 @@ class Userword(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=['user', 'word'], name='userword_user_word')]
+        unique_together = [['user', 'word']]
     
     def __str__(self):
         return f'{self.id} - {self.user.username}'

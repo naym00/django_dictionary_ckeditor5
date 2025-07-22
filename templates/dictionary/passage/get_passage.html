@@ -86,7 +86,7 @@
                 {% endif %}
             </div>
             <div class="d-flex justify-content-center align-items-center">
-                {% if friends_passages %}
+                {% if preview_passages %}
                     <table class="table table-hover">
                         <thead>
                             <tr>
@@ -95,13 +95,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for friends_passage in friends_passages %}
+                            {% for preview_passage in preview_passages %}
                                 <tr>
                                     <td>
-                                        <a style="text-decoration: none;" href="/passage/get-passage-using-id/{{passage.id}}">{{friends_passage.passage.title}}</a>
+                                        <a class="d-flex flex-column" style="text-decoration: none;" href="/passage/get-passage-using-id/{{preview_passage.id}}">
+                                            <span>{{preview_passage.passage.title}}</span>
+                                            <span>{{preview_passage.user.full_name}}</span>
+                                        </a>
                                     </td>
                                     <td>
-                                        <a style="text-decoration: none;" href="/passage/add-passage-to-your-list/{{friends_passage.passage.id}}">Add To Your Passage List</a>
+                                        <a style="text-decoration: none;" href="/passage/add-passage-to-your-list/{{preview_passage.passage.id}}">Add To Your Passage List</a>
                                     </td>
                                 </tr>
                             {% endfor %}

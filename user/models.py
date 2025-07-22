@@ -36,7 +36,7 @@ class Userfriend(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        constraints = [models.UniqueConstraint(fields=['user', 'friend'], name='userfriend_user_friend')]
+        unique_together = [['user', 'friend']]
     def __str__(self):
         return f'{self.user.username} - {self.friend.username}'
     
@@ -47,6 +47,6 @@ class Friendrequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        constraints = [models.UniqueConstraint(fields=['user', 'requested_to'], name='friendrequest_user_requested_to')]
+        unique_together = [['user', 'requested_to']]
     def __str__(self):
         return f'{self.user.username} - {self.requested_to.username}'

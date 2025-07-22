@@ -1,6 +1,8 @@
 from django.db import models
+from help.common.generic import ghelp
 from user import models as MODELS_USER
 from word import models as MODELS_WORD
+from help.choice import choice as CHOICE
 from django_ckeditor_5.fields import CKEditor5Field
 
 class Passage(models.Model):
@@ -18,7 +20,7 @@ class Passageword(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        constraints = [models.UniqueConstraint(fields=['word', 'passage'], name='passageword_word_passage')]
+        unique_together = [['word', 'passage']]
     def __str__(self):
         return f'{self.id} - {self.passage.title}'
 
@@ -27,10 +29,18 @@ class Userpassage(models.Model):
     passage = models.ForeignKey(Passage, on_delete=models.CASCADE, related_name='passage_users')
     title = models.CharField(max_length=100)
     content = CKEditor5Field(config_name='extends')
-    # share_status = models.CharField(max_length=15, choices=())
+    share_to_user = models.CharField(max_length=15, choices=ghelp.list_to_tuple(CHOICE.SHARE_TO_USER))
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        constraints = [models.UniqueConstraint(fields=['user', 'passage'], name='passageword_user_passage')]
+        unique_together = [['user', 'passage']]
     def __str__(self):
         return f'{self.id} - {self.user.username} - {self.title}'
+    
+class UserPassageShareOnly(models.Model):
+    user_passage = models.ForeignKey(Userpassage, on_delete=models.CASCADE, db_index=True, related_name='share_user_passages')
+    user = models.ForeignKey(MODELS_USER.User, on_delete=models.CASCADE, related_name='user_shares')
+    class Meta:
+        unique_together = [['user_passage', 'user']]
+    def __str__(self):
+        return f'{self.id} - {self.user_passage.user.username}'
