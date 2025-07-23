@@ -91,11 +91,12 @@
             </div> {% endcomment %}
             <div class="d-flex flex-column">
                 <div class="d-flex justify-content-center align-items-center">
+                    <span>{{passage.audience}}</span>
+                    <a class="mx-1" style="border: none; background-color: transparent; cursor: pointer;" href="/passage/edit-passage/{{passage.id}}">Edit Passage</a>
+                    <a class="mx-1" style="border: none; background-color: transparent; cursor: pointer;" href="/passage/reset-passage/{{passage.id}}">Reset Passage</a>
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
                     <span class="h1 font-weight-bold">{{passage.title}}</span>
-                    <div class="btn-group-visibility d-flex align-items-center">
-                        <a class="mx-1" style="border: none; background-color: transparent; cursor: pointer;" href="/passage/edit-passage/{{passage.id}}">Edit Passage</a>
-                        <a class="mx-1" style="border: none; background-color: transparent; cursor: pointer;" href="/passage/reset-passage/{{passage.id}}">Reset Passage</a>
-                    </div>
                 </div>
                 <div>
                     <span>{{passage.content|safe}}</span>

@@ -9,15 +9,15 @@ class K(L):
         
         friend_passages = Userpassage.objects.filter(
             Q(user__in=friend_ids) & (
-                Q(share_to_user__in=['Public', 'Friend']) |
-                Q(share_to_user='Custom', share_user_passages__user=loggedin_user)
+                Q(audience__in=['Public', 'Friend']) |
+                Q(audience='Custom', audience_user_passages__user=loggedin_user)
             )
         ).order_by('?').exclude(
             passage__in=loggedin_user.user_passages.all().values_list('passage', flat=True)
         ).select_related('passage', 'user').distinct()
         
         non_friend_passages = Userpassage.objects.filter(
-            Q(share_to_user='Public') & ~Q(user__in=friend_ids)
+            Q(audience='Public') & ~Q(user__in=friend_ids)
         ).order_by('?').exclude(
             passage__in=loggedin_user.user_passages.all().values_list('passage', flat=True)
         ).select_related('passage', 'user').distinct()[:math.ceil((friend_passages.count()*30)/70)]

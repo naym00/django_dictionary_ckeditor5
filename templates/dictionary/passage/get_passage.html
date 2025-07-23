@@ -55,7 +55,7 @@
 
 {% block body %}
     {% if user.is_authenticated  %}
-        <div class="d-flex flex-row">
+        <div class="d-flex flex-row gap-5">
             <div class="d-flex justify-content-center align-items-center">
                 {% if passages %}
                     <table class="table table-hover">
@@ -91,6 +91,7 @@
                         <thead>
                             <tr>
                                 <th scope="col">Title</th>
+                                {% comment %} <th scope="col">Audience</th> {% endcomment %}
                                 <th scope="col">Action</th>
                             </tr>
                         </thead>
@@ -103,6 +104,21 @@
                                             <span>{{preview_passage.user.full_name}}</span>
                                         </a>
                                     </td>
+
+                                    {% comment %} <td>
+                                        <select id="audience" name="audience" class="transparent-input">
+                                            {% for audience in audiences %}
+                                                <option value="{{ audience }}">{{ audience }}</option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <select style="height: 100px;" class="d-none" id="audience_users" name="audience_users" multiple>
+                                            {% for friend in friends %}
+                                                <option value="{{ friend.id }}">{{ friend.username }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td> {% endcomment %}
+                                    
                                     <td>
                                         <a style="text-decoration: none;" href="/passage/add-passage-to-your-list/{{preview_passage.passage.id}}">Add To Your Passage List</a>
                                     </td>

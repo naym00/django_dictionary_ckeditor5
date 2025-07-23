@@ -58,10 +58,21 @@
 
 {% block body %}
     {% if user.is_authenticated  %}
-        <form method="POST" action="{% url 'add-passage' %}" class="d-flex flex-column">
+        <form method="POST" action="{% url 'add-passage' %}" class="d-flex flex-column mt-5">
             {% csrf_token %}
             <div class="d-flex justify-content-center align-items-center">
               {{form.title}}
+              <select id="audience" name="audience" class="transparent-input">
+                  {% for audience in audiences %}
+                      <option value="{{ audience }}">{{ audience }}</option>
+                  {% endfor %}
+              </select>
+
+              <select style="height: 100px;" class="d-none" id="audience_users" name="audience_users" multiple>
+                {% for friend in friends %}
+                  <option value="{{ friend.id }}">{{ friend.username }}</option>
+                {% endfor %}
+              </select>
             </div>
             <br>
             <div class="d-flex justify-content-center align-items-center">

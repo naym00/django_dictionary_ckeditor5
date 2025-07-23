@@ -6,6 +6,7 @@ from passage import forms as FORMS_PASS
 from word import models as MODELS_WORD
 from user import models as MODELS_USER
 from help.common.generic import ghelp
+from help.choice import choice as CHOICE
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def get_passages(request):
@@ -29,7 +30,9 @@ def get_passages(request):
             }
         },
         'passages': MODELS_PASS.Userpassage.objects.filter(user=request.user).order_by('-id'),
-        'preview_passages': ghelp.get_passages_to_display(MODELS_USER.Userfriend, MODELS_PASS.Userpassage, request.user)
+        'preview_passages': ghelp.get_passages_to_display(MODELS_USER.Userfriend, MODELS_PASS.Userpassage, request.user),
+        'audiences': CHOICE.AUDIENCE,
+        'friends': ghelp.get_friends(MODELS_USER.Userfriend, request.user, id=False),
     }
     return render(request, html_path, context=context)
 
@@ -55,16 +58,21 @@ def add_passage(request):
                 'register': ghelp.nav_links(key='register'),
             }
         },
-        'form': FORMS_PASS.CreatePassageForm()
+        'form': FORMS_PASS.CreatePassageForm(),
+        'audiences': CHOICE.AUDIENCE,
+        'friends': ghelp.get_friends(MODELS_USER.Userfriend, request.user, id=False)
     }
     if request.method == 'POST':
         form = FORMS_PASS.CreatePassageForm(request.POST)
         if form.is_valid():
+            audience = request.POST.get('audience')
             title = form.cleaned_data['title']
             content = form.cleaned_data['content']
             instance = MODELS_PASS.Passage.objects.create(title=title, content=content, added_by=request.user)
             
-            MODELS_PASS.Userpassage.objects.create(user=request.user, passage=instance, title=title, content=content)
+            user_passage = MODELS_PASS.Userpassage.objects.create(user=request.user, passage=instance, title=title, content=content, audience=audience)
+            for user_id in request.POST.getlist('audience_users'):
+                MODELS_PASS.UserPassageShareOnly.objects.create(user_passage=user_passage, user=MODELS_USER.User.objects.get(id=user_id))
             return redirect('get-passages')
     return render(request, html_path, context=context)
 
@@ -95,7 +103,10 @@ def edit_passage(request, user_passage_id=None):
         'form': FORMS_PASS.CreatePassageForm(initial={
             'title': user_passage.title,
             'content': user_passage.content
-        })
+        }),
+        'audiences': CHOICE.AUDIENCE,
+        'friends': ghelp.get_friends(MODELS_USER.Userfriend, request.user, id=False),
+        'selected_friends': [share.user.id for share in user_passage.audience_user_passages.select_related('user')]
     }
     if request.method == 'POST':
         if user_passage.user == request.user:
@@ -158,6 +169,9 @@ def remove_passage_from_my_list(request, user_passage_id=None):
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def add_passage_to_your_list(request, passageid=None):
+    # audience = request.POST.get('audience')
     passage=MODELS_PASS.Passage.objects.get(id=passageid)
-    MODELS_PASS.Userpassage.objects.create(user=request.user, passage=passage, title=passage.title, content=passage.content)
+    user_passage = MODELS_PASS.Userpassage.objects.create(user=request.user, passage=passage, title=passage.title, content=passage.content, audience='Public')
+    # for user_id in request.POST.getlist('audience_users'):
+    #             MODELS_PASS.UserPassageShareOnly.objects.create(user_passage=user_passage, user=MODELS_USER.User.objects.get(id=user_id))
     return redirect('get-passages')

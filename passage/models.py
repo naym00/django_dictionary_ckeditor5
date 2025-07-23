@@ -29,7 +29,7 @@ class Userpassage(models.Model):
     passage = models.ForeignKey(Passage, on_delete=models.CASCADE, related_name='passage_users')
     title = models.CharField(max_length=100)
     content = CKEditor5Field(config_name='extends')
-    share_to_user = models.CharField(max_length=15, choices=ghelp.list_to_tuple(CHOICE.SHARE_TO_USER))
+    audience = models.CharField(max_length=15, choices=ghelp.list_to_tuple(CHOICE.AUDIENCE))
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -38,8 +38,8 @@ class Userpassage(models.Model):
         return f'{self.id} - {self.user.username} - {self.title}'
     
 class UserPassageShareOnly(models.Model):
-    user_passage = models.ForeignKey(Userpassage, on_delete=models.CASCADE, db_index=True, related_name='share_user_passages')
-    user = models.ForeignKey(MODELS_USER.User, on_delete=models.CASCADE, related_name='user_shares')
+    user_passage = models.ForeignKey(Userpassage, on_delete=models.CASCADE, db_index=True, related_name='audience_user_passages')
+    user = models.ForeignKey(MODELS_USER.User, on_delete=models.CASCADE, related_name='user_audiences')
     class Meta:
         unique_together = [['user_passage', 'user']]
     def __str__(self):

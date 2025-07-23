@@ -52,8 +52,14 @@ class N(O):
         }
         return links[key] if key in links else '#'
     
-    def get_friends(self, Userfriend, loggedin_user):
-        return [user_id for pair in Userfriend.objects.filter(Q(user=loggedin_user) | Q(friend=loggedin_user)).values('user', 'friend') for user_id in pair.values() if user_id != loggedin_user.id]
+    def get_friends(self, Userfriend, loggedin_user, id=True):
+        if id: return [user_id for pair in Userfriend.objects.filter(Q(user=loggedin_user) | Q(friend=loggedin_user)).values('user', 'friend') for user_id in pair.values() if user_id != loggedin_user.id]
+        else:
+            friends = []
+            for user_friend in Userfriend.objects.filter(Q(user=loggedin_user) | Q(friend=loggedin_user)):
+                if user_friend.user.id == loggedin_user.id: friends.append(user_friend.friend)
+                else: friends.append(user_friend.user)
+            return friends
     
     def get_fields_name(self, model):
         return [field.name for field in model._meta.get_fields()]

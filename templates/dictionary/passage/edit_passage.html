@@ -61,6 +61,21 @@
             {% csrf_token %}
             <div class="d-flex justify-content-center align-items-center">
                 {{form.title}}
+                <select id="audience" name="audience" class="transparent-input">
+                  {% for audience in audiences %}
+                      <option value="{{ audience }}"
+                      {% if passage.audience == audience %}selected{% endif %}
+                      >{{ audience }}</option>
+                  {% endfor %}
+              </select>
+
+              <select style="height: 100px;" class="d-none" id="audience_users" name="audience_users" multiple>
+                {% for friend in friends %}
+                  <option value="{{ friend.id }}"
+                  {% if friend.id in selected_friends %}selected{% endif %}
+                  >{{ friend.username }}</option>
+                {% endfor %}
+              </select>
             </div>
             <br>
             <div class="d-flex justify-content-center align-items-center">

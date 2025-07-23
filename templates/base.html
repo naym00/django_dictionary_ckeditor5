@@ -138,38 +138,24 @@
                 .catch(error => {
                     console.error('Error fetching data:', error);
                 });
-
-
-
-
-
-
-
-
-
-                // let timeLeft = 120;
-                // const countdownEl = document.getElementById('countdown');
-                
-                // Update the countdown every second
-                // const timer = setInterval(function() {
-                //     const minutes = Math.floor(timeLeft / 60);
-                //     let seconds = timeLeft % 60;
-                //     seconds = seconds < 10 ? '0' + seconds : seconds;
-                    
-                    // Display in MM:SS format
-                //     countdownEl.innerHTML = `${minutes}:${seconds}`;
-                    
-                //     timeLeft--;
-                    
-                //     if (timeLeft < 0) {
-                //         clearInterval(timer);
-                //         countdownEl.innerHTML = "Time's up!";
-                //         countdownEl.style.color = "#ff0000";
-                //     }
-                // }, 1000);
             }
             twoMinutes()
-            
         </script>
+
+        <script>
+            const audienceSelect = document.getElementById('audience');
+            const audienceUsers = document.getElementById('audience_users');
+            function toggleCustomUsers() {
+                if (audienceSelect.value === 'Custom') {
+                    audienceUsers.className = 'd-flex';
+                }
+                else {
+                    audienceUsers.className = 'd-none';
+                }
+            }
+            audienceSelect.addEventListener('change', toggleCustomUsers);
+            document.addEventListener('DOMContentLoaded', toggleCustomUsers);
+        </script>
+
     </body>
 </html>
