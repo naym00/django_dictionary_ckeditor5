@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load passage_filters %}
 {% block title %}{{title}}{% endblock %}
+{% block head %}
+  {{ form.media }}
+{% endblock %}
 
 
 {% block navbar %}
@@ -89,17 +92,33 @@
                     </form>
                 </div>
             </div> {% endcomment %}
-            <div class="d-flex flex-column">
-                <div class="d-flex justify-content-center align-items-center">
-                    <span>{{passage.audience}}</span>
-                    <a class="mx-1" style="border: none; background-color: transparent; cursor: pointer;" href="/passage/edit-passage/{{passage.id}}">Edit Passage</a>
-                    <a class="mx-1" style="border: none; background-color: transparent; cursor: pointer;" href="/passage/reset-passage/{{passage.id}}">Reset Passage</a>
+
+            <div class="d-flex flex-row gap-2">
+                <div  id="passageContentDiv" class="d-flex flex-column w-100">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <span>{{passage.audience}}</span>
+                        <a class="mx-1" style="border: none; background-color: transparent; cursor: pointer;" href="/passage/edit-passage/{{passage.id}}">Edit Passage</a>
+                        <a class="mx-1" style="border: none; background-color: transparent; cursor: pointer;" href="/passage/reset-passage/{{passage.id}}">Reset Passage</a>
+                        <button id="passageNote" type="button" onclick="togglePassageNote()" style="border: none; background-color: transparent; cursor: pointer;">Show Note</button>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <span class="h1 font-weight-bold">{{passage.title}}</span>
+                    </div>
+                    <div>
+                        <span>{{passage.content|safe}}</span>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-center align-items-center">
-                    <span class="h1 font-weight-bold">{{passage.title}}</span>
-                </div>
-                <div>
-                    <span>{{passage.content|safe}}</span>
+                <div id="passageNoteDiv" class="d-none">
+                    <button id="passageNoteEdit" type="button" onclick="editpassageNote()" style="border: none; background-color: transparent; cursor: pointer;">Edit Note</button>
+
+                    <form id="editNoteForm" class="d-none" method="POST" action="{% url 'get-passage-using-id' passage.id %}">
+                        {% csrf_token %}
+                        {{form.note}}
+                        <input type="submit" value="Done">
+                    </form>
+
+
+                    <span id="previewNote">{{passage.note|safe}}</span>
                 </div>
             </div>
             

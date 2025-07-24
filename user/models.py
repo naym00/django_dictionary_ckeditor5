@@ -30,7 +30,7 @@ class User(AbstractUser):
         return f'{self.username} - {self.is_superuser}'
     
 
-class Userfriend(models.Model):
+class UserFriend(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_friends')
     friend = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friend_users')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,7 +40,7 @@ class Userfriend(models.Model):
     def __str__(self):
         return f'{self.user.username} - {self.friend.username}'
     
-class Friendrequest(models.Model):
+class FriendRequest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_requested_tos')
     requested_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='requested_to_users')
     request_message = models.CharField(max_length=200, blank=True, null=True)

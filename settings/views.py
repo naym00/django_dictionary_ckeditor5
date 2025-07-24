@@ -11,7 +11,7 @@ def get_settings(request):
     response_status = status.HTTP_400_BAD_REQUEST
     settings = ghelp.get_settings(MODELS_SETT.Settings)
     if settings:
-        serialize_data = SR_SETT.Settingsserializer(settings, many=False).data
+        serialize_data = SR_SETT.SettingsSerializer(settings, many=False).data
         response_status = status.HTTP_200_OK
     
     return Response(serialize_data, status=response_status)

@@ -1,11 +1,6 @@
-from word import models as MODELS_WORD
-from word_meaning import models as MODELS_MEAN
-from example import models as MODELS_EXAM
 from user import models as MODELS_USER
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from word.serializers.GET import serializer as SR_WORD
 from help.common.generic import ghelp
+from django.shortcuts import render
 
 def home(request):
     html_path = 'dictionary/home.html'
@@ -26,7 +21,7 @@ def home(request):
                 'register': ghelp.nav_links(key='register'),
             }
         },
-        'potential_friends': ghelp.users_to_send_friend_request(MODELS_USER.User, MODELS_USER.Userfriend, MODELS_USER.Friendrequest, request.user) if request.user.is_authenticated else [],
+        'potential_friends': ghelp.users_to_send_friend_request(MODELS_USER.User, MODELS_USER.UserFriend, MODELS_USER.FriendRequest, request.user) if request.user.is_authenticated else [],
         'friend_requests': request.user.requested_to_users.all() if request.user.is_authenticated else []
     }
     

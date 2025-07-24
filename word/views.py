@@ -14,8 +14,8 @@ def words(request):
     context = {
         'title': 'Words',
         'user': request.user,
-        'words': SR_WORD.Userwordserializer(request.user.user_words.all().order_by('-id'), many=True).data,
-        'level': SR_WORD.Complexitylevelserializer(MODELS_WORD.Complexitylevel.objects.all(), many=True).data
+        'words': SR_WORD.UserWordSerializer(request.user.user_words.all().order_by('-id'), many=True).data,
+        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     }
     return render(request, html_path, context=context)
 
@@ -27,7 +27,7 @@ def new_words(request):
         context = {
             'title': 'New Words',
             'user': request.user,
-            'words': SR_WORD.Userwordserializer(
+            'words': SR_WORD.UserWordSerializer(
                 request.user.user_words.filter(
                     created_at__gte=ghelp.n_days_back_datetime(
                         n_days=settings.new_word_day_duration,
@@ -36,7 +36,7 @@ def new_words(request):
                 ).order_by('-id'),
                 many=True
             ).data,
-            'level': SR_WORD.Complexitylevelserializer(MODELS_WORD.Complexitylevel.objects.all(), many=True).data
+            'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
         }
         return render(request, html_path, context=context)
     return redirect('preview-words')
@@ -47,8 +47,8 @@ def easy_words(request):
     context = {
         'title': 'Easy Words',
         'user': request.user,
-        'words': SR_WORD.Userwordserializer(request.user.user_words.filter(level__difficulty_level=1).order_by('-id'), many=True).data,
-        'level': SR_WORD.Complexitylevelserializer(MODELS_WORD.Complexitylevel.objects.all(), many=True).data
+        'words': SR_WORD.UserWordSerializer(request.user.user_words.filter(level__difficulty_level=1).order_by('-id'), many=True).data,
+        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     }
     return render(request, html_path, context=context)
 
@@ -58,8 +58,8 @@ def medium_words(request):
     context = {
         'title': 'Medium Words',
         'user': request.user,
-        'words': SR_WORD.Userwordserializer(request.user.user_words.filter(level__difficulty_level=2).order_by('-id'), many=True).data,
-        'level': SR_WORD.Complexitylevelserializer(MODELS_WORD.Complexitylevel.objects.all(), many=True).data
+        'words': SR_WORD.UserWordSerializer(request.user.user_words.filter(level__difficulty_level=2).order_by('-id'), many=True).data,
+        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     }
     return render(request, html_path, context=context)
 
@@ -69,8 +69,8 @@ def hard_words(request):
     context = {
         'title': 'Hard Words',
         'user': request.user,
-        'words': SR_WORD.Userwordserializer(request.user.user_words.filter(level__difficulty_level=3).order_by('-id'), many=True).data,
-        'level': SR_WORD.Complexitylevelserializer(MODELS_WORD.Complexitylevel.objects.all(), many=True).data
+        'words': SR_WORD.UserWordSerializer(request.user.user_words.filter(level__difficulty_level=3).order_by('-id'), many=True).data,
+        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     }
     return render(request, html_path, context=context)
 
@@ -80,8 +80,8 @@ def word_details(request):
     context = {
         'title': 'Words',
         'user': request.user,
-        'words': SR_WORD.Userwordserializer(request.user.user_words.all().order_by('-id'), many=True).data,
-        'level': SR_WORD.Complexitylevelserializer(MODELS_WORD.Complexitylevel.objects.all(), many=True).data
+        'words': SR_WORD.UserWordSerializer(request.user.user_words.all().order_by('-id'), many=True).data,
+        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     }
     return render(request, html_path, context=context)
 
@@ -103,17 +103,17 @@ def add_word(request):
                 added_by=request.user
             )
         if example != '': MODELS_EXAM.Example.objects.create(sentence=example.strip().capitalize(), word=word_instance, added_by=request.user)
-        MODELS_MEAN.Wordmeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
+        MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
 
         user_word = request.user.user_words.filter(word=word_instance)
         if user_word.exists():
             if user_word.first().level.id != difficult_level:
-                user_word.update(level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level))
+                user_word.update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
         else:
-            MODELS_WORD.Userword.objects.create(
+            MODELS_WORD.UserWord.objects.create(
                 user=request.user,
                 word=word_instance,
-                level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level)
+                level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level)
             )
     return redirect('preview-words')
 
@@ -143,14 +143,14 @@ def edit_word_complexity_level(request, id=None):
     if request.method == 'POST':
         difficult_level = request.POST.get('difficult_level')
         if difficult_level:
-            MODELS_WORD.Userword.objects.filter(id=id).update(level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level))
+            MODELS_WORD.UserWord.objects.filter(id=id).update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
     return redirect('preview-words')
 
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def add_word_from_passage(request, user_passage_id=None):
     if request.method == 'POST':
-        user_passage = MODELS_PASS.Userpassage.objects.get(id=user_passage_id)
+        user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
         
         text = request.POST.get('text')
         meaning = request.POST.get('meaning').strip()
@@ -166,16 +166,16 @@ def add_word_from_passage(request, user_passage_id=None):
             )
         wordmeaning = word_instance.meanings.filter(text=meaning)
         if not wordmeaning.exists():
-            MODELS_MEAN.Wordmeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
+            MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
         
         userword = request.user.user_words.filter(word=word_instance)
         if not userword.exists():
-            MODELS_WORD.Userword.objects.create(user=request.user, word=word_instance, level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level))
+            MODELS_WORD.UserWord.objects.create(user=request.user, word=word_instance, level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
         else:
             if userword.first().level.id != difficult_level:
-                userword.update(level=MODELS_WORD.Complexitylevel.objects.get(id=difficult_level))
+                userword.update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
         
         passageword = word_instance.word_passages.filter(passage=user_passage.passage.id)
         if not passageword.exists():
-            MODELS_PASS.Passageword.objects.create(word=word_instance, passage=MODELS_PASS.Passage.objects.get(id=user_passage.passage.id))
+            MODELS_PASS.PassageWord.objects.create(word=word_instance, passage=MODELS_PASS.Passage.objects.get(id=user_passage.passage.id))
     return redirect('get-passage-using-id', user_passage_id=user_passage_id)

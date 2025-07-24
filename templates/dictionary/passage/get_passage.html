@@ -55,80 +55,95 @@
 
 {% block body %}
     {% if user.is_authenticated  %}
-        <div class="d-flex flex-row gap-5">
-            <div class="d-flex justify-content-center align-items-center">
-                {% if passages %}
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th scope="col">Title</th>
-                                {% comment %} <th scope="col">Content</th> {% endcomment %}
-                                <th scope="col">Created At</th>
-                                <th scope="col">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for passage in passages %}
+        <div class="d-flex flex-row justify-content-center gap-5 mt-4">
+            <div class="d-flex flex-column w-50">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex-column justify-content-center align-items-center">
+                        <span class="h2">Your Passages</span>
+                        <div class="d-flex justify-content-center gap-4">
+                            <a style="text-decoration: none;" href="/passage/refetch-passages">Refetch</a>
+                            <a style="text-decoration: none;" href="/passage/remove-passages">Remove</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center align-items-center mt-4">
+                    {% if passages %}
+                        <table class="table table-hover">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <a style="text-decoration: none;" href="/passage/get-passage-using-id/{{passage.id}}">{{passage.title}}</a>
-                                    </td>
-                                    <td>{{passage.created_at}}</td>
-                                    <td>
-                                        <a style="text-decoration: none;" href="/passage/remove-passage-from-my-list/{{passage.id}}">Remove From List</a>
-                                    </td>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Created At</th>
+                                    <th scope="col">Action</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <h1>No passage is available.</h1>
-                {% endif %}
+                            </thead>
+                            <tbody>
+                                {% for passage in passages %}
+                                    <tr>
+                                        <td>
+                                            <a style="text-decoration: none;" href="/passage/get-passage-using-id/{{passage.id}}">{{passage.title}}</a>
+                                        </td>
+                                        <td>{{passage.created_at}}</td>
+                                        <td>
+                                            <a style="text-decoration: none;" href="/passage/remove-passage-from-my-list/{{passage.id}}">Remove From List</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <span class="h5">Passage List is Empty.</span>
+                    {% endif %}
+                </div>
             </div>
-            <div class="d-flex justify-content-center align-items-center">
-                {% if preview_passages %}
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th scope="col">Title</th>
-                                {% comment %} <th scope="col">Audience</th> {% endcomment %}
-                                <th scope="col">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for preview_passage in preview_passages %}
+
+            <div class="d-flex flex-column w-50">
+                <div class="d-flex justify-content-center align-items-center">
+                    <span class="h2">Suggession Passages</span>
+                </div>
+                <div class="d-flex justify-content-center align-items-center mt-4">
+                    {% if preview_passages %}
+                        <table class="table table-hover">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <a class="d-flex flex-column" style="text-decoration: none;" href="/passage/get-passage-using-id/{{preview_passage.id}}">
-                                            <span>{{preview_passage.passage.title}}</span>
-                                            <span>{{preview_passage.user.full_name}}</span>
-                                        </a>
-                                    </td>
-
-                                    {% comment %} <td>
-                                        <select id="audience" name="audience" class="transparent-input">
-                                            {% for audience in audiences %}
-                                                <option value="{{ audience }}">{{ audience }}</option>
-                                            {% endfor %}
-                                        </select>
-
-                                        <select style="height: 100px;" class="d-none" id="audience_users" name="audience_users" multiple>
-                                            {% for friend in friends %}
-                                                <option value="{{ friend.id }}">{{ friend.username }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </td> {% endcomment %}
-                                    
-                                    <td>
-                                        <a style="text-decoration: none;" href="/passage/add-passage-to-your-list/{{preview_passage.passage.id}}">Add To Your Passage List</a>
-                                    </td>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Action</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <h1>Suggessions are not available.</h1>
-                {% endif %}
+                            </thead>
+                            <tbody>
+                                {% for preview_passage in preview_passages %}
+                                    <tr>
+                                        <td>
+                                            <a class="d-flex flex-column" style="text-decoration: none;" href="/passage/get-passage-using-id/{{preview_passage.id}}">
+                                                <span>{{preview_passage.passage.title}}</span>
+                                                <span>{{preview_passage.user.full_name}}</span>
+                                            </a>
+                                        </td>
+
+                                        <td>
+                                            <form method="POST" action="{% url 'add-passage-to-your-list' preview_passage.passage.id %}" class="d-inline d-flex align-items-center">
+                                                {% csrf_token %}
+                                                <select id="audience" name="audience" class="transparent-input">
+                                                    {% for audience in audiences %}
+                                                        <option value="{{ audience }}">{{ audience }}</option>
+                                                    {% endfor %}
+                                                </select>
+
+                                                <select style="height: 100px;" class="d-none" id="audience_users" name="audience_users" multiple>
+                                                    {% for friend in friends %}
+                                                        <option value="{{ friend.id }}">{{ friend.username }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <button type="submit" style="border: none; background-color: transparent; cursor: pointer;">Add To Your Passage List</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                    <span class="h5">No Suggessions are Available.</span>
+                    {% endif %}
+                </div>
             </div>
         </div>
         

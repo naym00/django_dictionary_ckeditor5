@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from word_meaning import models as MODELS_MEAN
 
-class Wordmeaningserializer(serializers.ModelSerializer):
+class WordMeaningSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MODELS_MEAN.Wordmeaning
+        model = MODELS_MEAN.WordMeaning
         fields='__all__'
+        read_only_fields = ['id', 'created_at']

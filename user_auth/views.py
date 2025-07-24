@@ -136,8 +136,9 @@ def user_login(request):
                 context['error']['password'] = 'Invalid Password'
                 context['field']['password'] = password
             else:
-                login(request, user)
-                return redirect('home')
+                if not user.is_superuser:
+                    login(request, user)
+                    return redirect('home')
     return render(request, html_path, context=context)
 
 def forgot_password(request):
@@ -164,7 +165,7 @@ def forgot_password(request):
                 message = f'This is your OTP: {otp}'
                 recipient_list = [email]
                 if ghelp.send_mail_including_attatchment(subject, message, recipient_list, attachments=[], email_from = None):
-                    MODELS_AUTH.Forgotpassword.objects.create(
+                    MODELS_AUTH.ForgotPassword.objects.create(
                         user=user.first(),
                         otp=otp
                     )
@@ -194,7 +195,7 @@ def set_new_password(request):
     if settings != None:
         if request.method == "POST":
             otp = request.POST.get('otp')
-            forgot_password = MODELS_AUTH.Forgotpassword.objects.filter(otp=otp)
+            forgot_password = MODELS_AUTH.ForgotPassword.objects.filter(otp=otp)
             if forgot_password.exists():
                 password = request.POST.get('password')
                 confirm_password = request.POST.get('confirmPassword')
@@ -208,7 +209,7 @@ def set_new_password(request):
                         user.save()
                         forgot_password.delete()
                         
-                        for item in MODELS_AUTH.Forgotpassword.objects.all():
+                        for item in MODELS_AUTH.ForgotPassword.objects.all():
                             duration = ((today_datetime - item.created_at).seconds)/60
                             if duration>settings.otp_validation_minutes: item.delete()
                         login(request, user)
