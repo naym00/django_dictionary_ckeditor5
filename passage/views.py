@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from word.serializers.GET import serializer as SR_WORD
+from word_meaning.serializers.GET import serializer as SR_MEAN
 from django.shortcuts import render, redirect
 from passage import models as MODELS_PASS
 from passage import forms as FORMS_PASS
@@ -7,6 +8,9 @@ from word import models as MODELS_WORD
 from user import models as MODELS_USER
 from help.common.generic import ghelp
 from help.choice import choice as CHOICE
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+import requests
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def get_passages(request):
@@ -29,7 +33,7 @@ def get_passages(request):
                 'register': ghelp.nav_links(key='register'),
             }
         },
-        'passages': MODELS_PASS.UserPassage.objects.filter(user=request.user).order_by('-id'),
+        'passages': MODELS_PASS.UserPassage.objects.filter(user=request.user, hide_from_mine_profile=False).order_by('-id'),
         'preview_passages': ghelp.get_passages_to_display(MODELS_USER.UserFriend, MODELS_PASS.UserPassage, request.user),
         'audiences': CHOICE.AUDIENCE,
         'friends': ghelp.get_friends(MODELS_USER.UserFriend, request.user, id=False),
@@ -150,6 +154,13 @@ def get_passage_using_id(request, user_passage_id=None):
     html_path = 'dictionary/passage/passage_using_id.html'
     user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
     
+    complexity = request.GET.get('complexity', '0')
+    filter_dict = {'word__word_passages__passage_id': user_passage.passage.id}
+    if complexity != '0': filter_dict.update({'level__difficulty_level': complexity})
+    
+    word_instances = request.user.user_words.filter(**filter_dict)
+    word_serializers = SR_WORD.UserWordSerializer(word_instances.distinct().order_by('-id'), many=True).data
+    
     context = {
         'title': 'Single Passage',
         'user': request.user,
@@ -173,12 +184,7 @@ def get_passage_using_id(request, user_passage_id=None):
         'form': FORMS_PASS.CreatePassageNote(initial={
             'note': user_passage.note
         }),
-        'words': SR_WORD.UserWordSerializer(
-            request.user.user_words.filter(
-                word__word_passages__passage_id=user_passage.passage.id
-            ).distinct().order_by('-id'),
-            many=True
-        ).data
+        'group_of_four_words': [word_serializers[i:i+4] for i in range(0, len(word_serializers), 4)]
     }
     if request.method == 'POST':
         if user_passage.user == request.user:
@@ -187,6 +193,29 @@ def get_passage_using_id(request, user_passage_id=None):
                 user_passage.note=form.cleaned_data['note']
                 user_passage.save()
                 return redirect('get-passage-using-id', user_passage_id=user_passage_id)
+    
+    if request.headers.get('X-Requested-With') == 'Word-Complexity-Level':
+        # For AJAX requests, return JSON
+        return JsonResponse({'html': render_to_string('dictionary/passage/passage_words.html', context, request=request)})
+    elif request.headers.get('X-Requested-With') == 'Selected-Word-Meaning':
+        meanings = []
+        is_own_source = True
+        word_text = request.GET.get('word')
+        if word_text:
+            word = MODELS_WORD.Word.objects.filter(text=word_text.strip().capitalize())
+            if word.exists(): meanings = SR_MEAN.WordMeaningSerializer(word.first().meanings.all(), many=True).data
+            else:
+                response = None
+                try: response = requests.get(f'https://lingva.ml/api/v1/en/bn/{word_text.strip().lower()}')
+                except: pass
+                if response != None:
+                    if response.status_code:
+                        meanings = [{'text': response.json()['translation']}]
+                        is_own_source = False
+                else:
+                    meanings = [{'text': 'দুঃখিত, আপাতত ইন্টারনেট সংযোগ নেই।'}]
+                    is_own_source = False
+        return JsonResponse({'meanings': meanings, 'is_own_source': is_own_source})
     return render(request, html_path, context=context)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])

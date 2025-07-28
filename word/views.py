@@ -7,69 +7,48 @@ from word import models as MODELS_WORD
 from passage import models as MODELS_PASS
 from settings import models as MODELS_SETT
 from help.common.generic import ghelp
+import re
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def words(request):
     html_path = 'dictionary/word/words.html'
+    filter_dict = {}
+    word_type = request.GET.get('word_type', 'all')
+    if word_type:
+        word_type = word_type.lower()
+        if word_type == 'new':
+            settings = ghelp.get_settings(MODELS_SETT.Settings)
+            if settings:
+                filter_dict.update(
+                    {
+                        'created_at__gte': ghelp.n_days_back_datetime(
+                            n_days=settings.new_word_day_duration,
+                            zone=ghelp.dhaka_timezone
+                        )
+                    }
+                )
+        else:
+            if word_type in [item.text.lower() for item in MODELS_WORD.ComplexityLevel.objects.only('text')]:
+                filter_dict.update({'level__text__iexact': word_type})
     context = {
         'title': 'Words',
         'user': request.user,
-        'words': SR_WORD.UserWordSerializer(request.user.user_words.all().order_by('-id'), many=True).data,
-        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
-    }
-    return render(request, html_path, context=context)
-
-@login_required(login_url=ghelp.nav_links(key='login')['link'])
-def new_words(request):
-    settings = ghelp.get_settings(MODELS_SETT.Settings)
-    if settings:
-        html_path = 'dictionary/word/new_words.html'
-        context = {
-            'title': 'New Words',
-            'user': request.user,
-            'words': SR_WORD.UserWordSerializer(
-                request.user.user_words.filter(
-                    created_at__gte=ghelp.n_days_back_datetime(
-                        n_days=settings.new_word_day_duration,
-                        zone=ghelp.dhaka_timezone
-                    )
-                ).order_by('-id'),
-                many=True
-            ).data,
-            'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
-        }
-        return render(request, html_path, context=context)
-    return redirect('preview-words')
-
-@login_required(login_url=ghelp.nav_links(key='login')['link'])
-def easy_words(request):
-    html_path = 'dictionary/word/easy_words.html'
-    context = {
-        'title': 'Easy Words',
-        'user': request.user,
-        'words': SR_WORD.UserWordSerializer(request.user.user_words.filter(level__difficulty_level=1).order_by('-id'), many=True).data,
-        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
-    }
-    return render(request, html_path, context=context)
-
-@login_required(login_url=ghelp.nav_links(key='login')['link'])
-def medium_words(request):
-    html_path = 'dictionary/word/medium_words.html'
-    context = {
-        'title': 'Medium Words',
-        'user': request.user,
-        'words': SR_WORD.UserWordSerializer(request.user.user_words.filter(level__difficulty_level=2).order_by('-id'), many=True).data,
-        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
-    }
-    return render(request, html_path, context=context)
-
-@login_required(login_url=ghelp.nav_links(key='login')['link'])
-def hard_words(request):
-    html_path = 'dictionary/word/hard_words.html'
-    context = {
-        'title': 'Hard Words',
-        'user': request.user,
-        'words': SR_WORD.UserWordSerializer(request.user.user_words.filter(level__difficulty_level=3).order_by('-id'), many=True).data,
+        'nav_links': {
+            'auth': {
+                'home': ghelp.nav_links(key='home', user=request.user),
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
+                'words': ghelp.nav_links(key='words'),
+                'word_details': ghelp.nav_links(key='word_details'),
+                'logout': ghelp.nav_links(key='logout')
+            },
+            'unauth': {
+                'home': ghelp.nav_links(key='home'),
+                'login': ghelp.nav_links(key='login'),
+                'register': ghelp.nav_links(key='register'),
+            }
+        },
+        'words': SR_WORD.UserWordSerializer(request.user.user_words.filter(**filter_dict).order_by('-id'), many=True).data,
         'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     }
     return render(request, html_path, context=context)
@@ -80,6 +59,21 @@ def word_details(request):
     context = {
         'title': 'Words',
         'user': request.user,
+        'nav_links': {
+            'auth': {
+                'home': ghelp.nav_links(key='home', user=request.user),
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
+                'words': ghelp.nav_links(key='words'),
+                'word_details': ghelp.nav_links(key='word_details'),
+                'logout': ghelp.nav_links(key='logout')
+            },
+            'unauth': {
+                'home': ghelp.nav_links(key='home'),
+                'login': ghelp.nav_links(key='login'),
+                'register': ghelp.nav_links(key='register'),
+            }
+        },
         'words': SR_WORD.UserWordSerializer(request.user.user_words.all().order_by('-id'), many=True).data,
         'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     }
@@ -153,7 +147,7 @@ def add_word_from_passage(request, user_passage_id=None):
         user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
         
         text = request.POST.get('text')
-        meaning = request.POST.get('meaning').strip()
+        meanings = re.split('[|.,;]', request.POST.get('meaning'))
         difficult_level = int(request.POST.get('difficult_level'))
         
         
@@ -164,9 +158,13 @@ def add_word_from_passage(request, user_passage_id=None):
                 text=text.strip().capitalize(),
                 added_by=request.user
             )
-        wordmeaning = word_instance.meanings.filter(text=meaning)
-        if not wordmeaning.exists():
-            MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
+            
+        for meaning in meanings:
+            meaning = meaning.strip()
+            if meaning:
+                word_meaning = word_instance.meanings.filter(text=meaning)
+                if not word_meaning.exists():
+                    MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
         
         userword = request.user.user_words.filter(word=word_instance)
         if not userword.exists():

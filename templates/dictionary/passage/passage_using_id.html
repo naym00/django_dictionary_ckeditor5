@@ -7,68 +7,41 @@
 
 
 {% block navbar %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light position-sticky top-0">
-    {% if user.is_authenticated  %}
-    <a class="navbar-brand" href="{{nav_links.auth.home.link}}">{{nav_links.auth.home.level}}</a>
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
-        <ul class="navbar-nav">
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle" type="button" id="wordsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    Passage
-                </button>
-                <div class="dropdown-menu" aria-labelledby="wordsDropdown">
-                    <a class="dropdown-item" href="{{nav_links.auth.view_passage.link}}">{{nav_links.auth.view_passage.level}}</a>
-                    <a class="dropdown-item" href="{{nav_links.auth.add_passage.link}}">{{nav_links.auth.add_passage.level}}</a>
-                </div>
-            </li>
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle" type="button" id="wordsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    Preview Words
-                </button>
-                <div class="dropdown-menu" aria-labelledby="wordsDropdown">
-                    <a class="dropdown-item" href="{{nav_links.auth.words.link}}">{{nav_links.auth.words.level}}</a>
-                    <a class="dropdown-item" href="{{nav_links.auth.word_details.link}}">{{nav_links.auth.word_details.level}}</a>
-                </div>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="{{nav_links.auth.logout.link}}">{{nav_links.auth.logout.level}}</a>
-            </li>
-        </ul>
-
-        <div>
-            <div class="d-flex">
-                <form method="POST" action="{% url 'add-word-from-passage' passage.id %}" class="form-inline w-100 d-flex justify-content-between">
-                    {% csrf_token %}
-                    <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
-                    <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="meaning" placeholder="Meaning" required>
-                    <select class="rounded" style="border: 1px solid #a3ada6;" name="difficult_level">
-                        {% for item in level %}
-                            <option value="{{ item.id }}">{{ item.text }}</option>
-                        {% endfor %}
-                    </select>
-                    <button type="submit" class="btn btn-sm"><i class="bi bi-check-lg"></i></button>
-                </form>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark position-sticky top-0">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url nav_links.auth.home.name %}">{{nav_links.auth.home.level}}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.home.name %}">Home</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="passagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Passages</a>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="passagesDropdown">
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.view_passage.name %}">{{nav_links.auth.view_passage.level}}</a></li>
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.add_passage.name %}">{{nav_links.auth.add_passage.level}}</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="previewWordsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Preview Words</a>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="previewWordsDropdown">
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.words.name %}">{{nav_links.auth.words.level}}</a></li>
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.word_details.name %}">{{nav_links.auth.word_details.level}}</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.logout.name %}">{{nav_links.auth.logout.level}}</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.home.name %}">{{nav_links.unauth.home.level}}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.login.name %}">{{nav_links.unauth.login.level}}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.register.name %}">{{nav_links.unauth.register.level}}</a></li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
-
-    </div>
-    {% else %}
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" href="{{nav_links.unauth.home.link}}">{{nav_links.unauth.home.level}}</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{nav_links.unauth.register.link}}">{{nav_links.unauth.register.level}}</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{nav_links.unauth.login.link}}">{{nav_links.unauth.login.level}}</a>
-            </li>
-        </ul>
-    </div>
-    {% endif %}
-</nav>
+    </nav>
 {% endblock %}
 
 
@@ -94,14 +67,54 @@
             </div> {% endcomment %}
 
             <div class="d-flex flex-row gap-2">
-                <div  id="passageContentDiv" class="d-flex flex-column w-100">
-                    <div class="d-flex justify-content-center align-items-center">
-                        <span>{{passage.audience}}</span>
-                        <a class="mx-1" style="border: none; background-color: transparent; cursor: pointer;" href="/passage/edit-passage/{{passage.id}}">Edit Passage</a>
-                        <a class="mx-1" style="border: none; background-color: transparent; cursor: pointer;" href="/passage/reset-passage/{{passage.id}}">Reset Passage</a>
-                        <button id="passageNote" type="button" onclick="togglePassageNote()" style="border: none; background-color: transparent; cursor: pointer;">Show Note</button>
+                <div id="passageContentDiv" class="d-flex flex-column">
+                    <div class="d-flex justify-content-center align-items-center make-transparent m-auto" style="position: sticky; top: 57px;">
+                        <div class="bg-secondary rounded m-1 text-light">
+                            <div class="flex flex-row m-2">
+                                <i class="bi bi-eye-fill"></i>
+                                <span>{{passage.audience}}</span>
+                            </div>
+                        </div>
+                        
+                        <a class="bg-secondary rounded m-1 text-light" style="text-decoration: none; cursor: pointer;" href="/passage/edit-passage/{{passage.id}}">
+                            <div class="flex flex-row m-2">
+                                <i class="bi bi-pencil-square"></i>
+                                <span>Edit Passage</span>
+                            </div>
+                        </a>
+
+                        <a class="bg-secondary rounded m-1 text-light" style="text-decoration: none; cursor: pointer;" href="/passage/reset-passage/{{passage.id}}">
+                            <div class="flex flex-row m-2">
+                                <i class="bi bi-arrow-clockwise"></i>
+                                <span>Reset Passage</span>
+                            </div>
+                        </a>
+
+                        <button class="bg-secondary rounded m-1 text-light" type="button" onclick="togglePassageNote()" style="border: none; cursor: pointer;">
+                            <div id="passageNote" class="flex flex-row m-2">
+                                <i class="bi bi-eye-fill"></i>
+                                <span>Show Note</span>
+                            </div>
+                        </button>
                     </div>
-                    <div class="d-flex justify-content-center align-items-center">
+
+                    <div class="bg-secondary d-flex justify-content-center align-items-center make-transparent rounded m-auto" style="position: sticky; top: 110px;">
+                        <div class="d-flex justify-content-center align-items-center w-50 m-2">
+                            <form method="POST" action="{% url 'add-word-from-passage' passage.id %}" class="form-inline d-flex justify-content-between gap-1">
+                                {% csrf_token %}
+                                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
+                                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="meaning" placeholder="Meaning" required>
+                                <select class="rounded" style="border: 1px solid #a3ada6;" name="difficult_level">
+                                    {% for item in level %}
+                                        <option value="{{ item.id }}">{{ item.text }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm"><i style="font-size: 20px;" class="bi bi-check-circle"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-center align-items-center mt-2">
                         <span class="h1 font-weight-bold">{{passage.title}}</span>
                     </div>
                     <div>
@@ -109,123 +122,206 @@
                     </div>
                 </div>
                 <div id="passageNoteDiv" class="d-none">
-                    <button id="passageNoteEdit" type="button" onclick="editpassageNote()" style="border: none; background-color: transparent; cursor: pointer;">Edit Note</button>
-
+                    <button class="bg-secondary rounded m-1 text-light" type="button" onclick="editpassageNote()" style="border: none; cursor: pointer;">
+                        <div id="passageNoteEdit" class="flex flex-row m-2">
+                            <i class="bi bi-pen-fill"></i>
+                            <span>Edit Note</span>
+                        </div>
+                    </button>
                     <form id="editNoteForm" class="d-none" method="POST" action="{% url 'get-passage-using-id' passage.id %}">
                         {% csrf_token %}
                         {{form.note}}
-                        <input type="submit" value="Done">
+                        <input class="bg-secondary rounded m-1 text-light w-100" style="border: none; cursor: pointer;" type="submit" value="Done">
                     </form>
 
 
-                    <span id="previewNote">{{passage.note|safe}}</span>
+                    <span id="previewNote" class="mt-3">{{passage.note|safe}}</span>
                 </div>
             </div>
-            
-            <div class="d-flex justify-content-between flex-wrap mt-3">
-                {% for word in words %}
-                <div class="bg-primary-subtle w-25 d-flex flex-column m-1 rounded-3">
-                    <div class="m-2">
 
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <form method="POST" action="{% url 'edit-word' word.word.id %}" class="d-inline d-flex">
-                                    {% csrf_token %}
-                                    <div id="inputWordText{{ word.id }}" class="d-none">
-                                        <input class="transparent-input fw-bold" style="width: 150px;" type="text" value="{{word.word.text}}" name="text" required>
-                                    </div>
-                                    
-                                    <span id="spanWordText{{ word.id }}" class="fs-5 fw-bold text-decoration-underline">{{word.word.text}}</span>
-                                    <button id="buttonSubmitWordText{{ word.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
-                                    <div class="btn-group-visibility d-flex align-items-center">
-                                        <button id="buttonWordText{{ word.id }}" type="button" onclick="editField('buttonWordText{{ word.id }}', 'buttonSubmitWordText{{ word.id }}', 'spanWordText{{ word.id }}', 'inputWordText{{ word.id }}')" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-pencil"></i></button>
-                                    </div>
-                                </form>
-                                
-                                <form method="POST" action="{% url 'edit-word' word.word.id %}" class="d-inline d-flex">
-                                    {% csrf_token %}
-                                    <div id="inputPronunciation{{ word.id }}" class="d-none">
-                                        <input class="transparent-input fw-bold" style="width: 120px;" type="text" value="{{word.word.pronunciation}}" name="pronunciation" required>
-                                    </div>
-                                    <span id="spanPronunciation{{ word.id }}" class="fs-6 fw-bold fst-italic">{{word.word.pronunciation}}</span>
-                                    <button id="buttonSubmitPronunciation{{ word.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
-                                    <div class="btn-group-visibility d-flex align-items-center">
-                                        <button id="buttonPronunciation{{ word.id }}" type="button" onclick="editField('buttonPronunciation{{ word.id }}', 'buttonSubmitPronunciation{{ word.id }}', 'spanPronunciation{{ word.id }}', 'inputPronunciation{{ word.id }}')" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-pencil"></i></button>
-                                    </div>
-                                </form>
-                            </div>
-                            <form method="POST" action="{% url 'edit-word-complexity-level' word.id %}" class="d-inline d-flex align-items-center">
-                                {% csrf_token %}
-                                <div class="btn-group-visibility d-flex align-items-center">
-                                    <button id="buttonLevel{{ word.id }}" type="button" onclick="editField('buttonLevel{{ word.id }}', 'buttonSubmitLevel{{ word.id }}', 'spanLevel{{ word.id }}', 'inputLevel{{ word.id }}')" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-pencil"></i></button>
-                                </div>
-                                <button id="buttonSubmitLevel{{ word.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
-                                
-                                <div id="inputLevel{{ word.id }}" class="d-none">
-                                    <select name="difficult_level" class="transparent-input">
-                                        {% for item in level %}
-                                            <option value="{{ item.id }}"
-                                            {% if word.level.id == item.id %}selected{% endif %}
-                                            >{{ item.text }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <span id="spanLevel{{ word.id }}" class="badge bg-success">{{word.level.text}}</span>
-                            </form>
-                        </div>
 
-                        <div class="rounded-3">
-                            <hr>
-                            {% for meaning in word.word.meanings %}
-                            <div class="d-flex justify-content-between">
-                                <div class="d-flex">
-                                    <div style="min-width: 30px; max-width: 30px;"></div>
-                                    
-                                    <form method="POST" action="{% url 'edit-word-meaning' meaning.id %}" class="d-inline d-flex">
-                                        {% csrf_token %}
-                                        <div id="inputMeaning{{ meaning.id }}" class="d-none">
-                                            <input class="transparent-input fw-bold" style="width: 150px;" type="text" value="{{meaning.text}}" name="meaning" required>
-                                        </div>
-                                        <div id="spanMeaning{{ meaning.id }}" class="d-flex align-items-center">
-                                            <span>&#8226; {{meaning.text}}</span>
-                                        </div>
-                                        <button id="buttonSubmitMeaning{{ meaning.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
-                                    </form>
-                                </div>
-                                <div class="btn-group-visibility d-flex align-items-center">
-                                    <button id="buttonMeaning{{ meaning.id }}" type="button" onclick="editField('buttonMeaning{{ meaning.id }}', 'buttonSubmitMeaning{{ meaning.id }}', 'spanMeaning{{ meaning.id }}', 'inputMeaning{{ meaning.id }}')" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
-
-                                    <form method="POST" action="{% url 'delete-word-meaning' meaning.id %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <button class="btn btn-sm btn-danger" type="submit"><i class="bi bi-trash"></i></button>
-                                    </form>
-                                </div>
-                            </div>
-                            {% endfor %}
-                            <div class="make-vanish d-flex">
-                                <div style="min-width: 30px; max-width: 30px;"></div>
-                                <form method="POST" action="{% url 'add-word-meaning' word.id %}" class="form-inline w-100 d-flex justify-content-between">
-                                    {% csrf_token %}
-                                    <input class="transparent-input" type="text" name="meaning" placeholder="New Meaning" required>
-                                    <button type="submit" class="btn btn-sm btn-success btn-group-visibility"><i class="bi bi-check-lg"></i></button>
-                                </form>
-                            </div>
-                        </div>
-
-                        <div class="rounded-3">
-                            <div class="d-flex justify-content-end">
-                                <span>{{word.date_time|date}}</span>
-                            </div>
-                        </div>
-                        
+            {% if group_of_four_words %}
+                <div class="my-2" style="background-color: #dbd9d3; position: sticky; top: 55px;">
+                    <div class="d-flex justify-content-center">
+                        <button class="filter-btn active" data-complexity="0">All Words</button>
+                        {% for item in level %}
+                            <button class="filter-btn" data-complexity="{{item.difficulty_level}}">{{item.text}}</button>
+                        {% endfor %}
                     </div>
                 </div>
-                {% endfor %}
-            </div>
+
+                <div class="row" id="words-container">
+                    {% include 'dictionary/passage/passage_words.html' %}
+                </div>
+            {% endif %}
+
+            <div id="meaning-div"></div>
+            
         {% else %}
             <h1>No passage is available.</h1>
         {% endif %}
     {% else %}
         <h1>Login First</h1>
     {% endif %}
+
+    <script>
+        function togglePassageNote() {
+            const passageNote = document.getElementById('passageNote');
+            const contentDiv = document.getElementById('passageContentDiv');
+            const noteDiv = document.getElementById('passageNoteDiv');
+
+            if (noteDiv.className.includes('d-none')){
+                passageNote.innerHTML = '<i class="bi bi-eye-slash-fill"></i> <span>Hide Note</span>'
+                contentDiv.className = 'd-flex flex-column';
+                contentDiv.style.width = '60%';
+                noteDiv.className = 'd-flex flex-column mt-5';
+                noteDiv.style.width = '40%';
+            }
+            else {
+                passageNote.innerHTML = '<i class="bi bi-eye-fill"></i> <span>Show Note</span>'
+                contentDiv.className = 'd-flex flex-column';
+                contentDiv.style.width = '100%';
+                noteDiv.className = 'd-none';
+            }
+        }
+    </script>
+
+    <script>
+        function editpassageNote() {
+            const passageNoteEdit = document.getElementById('passageNoteEdit');
+            const form = document.getElementById('editNoteForm');
+            const span = document.getElementById('previewNote');
+            
+            if (form.className.includes('d-none')){
+                passageNoteEdit.innerHTML = '<i class="bi bi-x-lg"></i> <span>Cancel Edit</span>'
+                form.className='d-block mt-3'
+                span.className='d-none'
+            }
+            else {
+                passageNoteEdit.innerHTML = '<i class="bi bi-pen-fill"></i> <span>Edit Note</span>'
+                form.className='d-none'
+                span.className='d-block mt-3'
+            }
+            
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter buttons functionality
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const wordsContainer = document.getElementById('words-container');
+            const passageId = window.location.pathname.split('/')[3];
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Get the filter value
+                    const complexity = this.dataset.complexity;
+                    // Show loading indicator
+                    wordsContainer.innerHTML = '<div class="col-12 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+                    
+                    // Make AJAX request
+                    fetch(`/passage/get-passage-using-id/${passageId}/?complexity=${complexity}`, {
+                        headers: {
+                            'X-Requested-With': 'Word-Complexity-Level'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        wordsContainer.innerHTML = data.html;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        wordsContainer.innerHTML = '<div class="col-12 text-center text-danger">Error loading words</div>';
+                    });
+                });
+            });
+            
+            // Function to handle inline editing (make sure this is defined)
+            window.editField = function(buttonId, submitId, spanId, inputId) {
+                // Your existing editField implementation
+            };
+        });
+    </script>
+
+    <script>
+        document.addEventListener('mouseup', function () {
+            const selectedText = window.getSelection().toString().trim();
+            const meaningDiv = document.getElementById('meaning-div');
+            const passageId = window.location.pathname.split('/')[3];
+            meaningDiv.innerHTML = ''
+            meaningDiv.removeAttribute('style')
+            meaningDiv.style.display = 'none';
+            
+            if (selectedText) {
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                fetch(`/passage/get-passage-using-id/${passageId}/?word=${selectedText}`, {
+                    headers: {'X-Requested-With': 'Selected-Word-Meaning'}
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.meanings) {
+                        if(data.is_own_source){
+                            meaningDiv.style.backgroundColor = '#376164ff'
+                        } else {
+                            meaningDiv.style.backgroundColor = '#661c1cff'
+                        }
+                        data.meanings.forEach(meaning => {
+                            const span = document.createElement('span');
+                            span.textContent = `• ${meaning.text}`;
+                            span.style.margin = '5px'
+                            span.style.color = 'white'
+                            meaningDiv.appendChild(span)
+                        });
+                        meaningDiv.style.removeProperty('display');
+                        meaningDiv.style.display = 'flex';
+                        meaningDiv.style.flexDirection = 'column';
+                        meaningDiv.style.position = 'absolute';
+                        meaningDiv.style.left = `${rect.left + window.scrollX}px`;
+                        meaningDiv.style.top = `${rect.top + window.scrollY - meaningDiv.offsetHeight - 25}px`;
+                        meaningDiv.style.borderRadius = '5px'
+                    }
+                });
+                
+            }
+            
+        });
+        // Hide tooltip when clicking elsewhere
+        document.addEventListener('mousedown', function(e) {
+            if (!e.target.closest('#meaning-div')) {
+                document.getElementById('meaning-div').style.display = 'none';
+            }
+        });
+    </script>
+
+    <style>
+        .passage-title {
+            width: 500px;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .filter-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+    </style>
 {% endblock %}

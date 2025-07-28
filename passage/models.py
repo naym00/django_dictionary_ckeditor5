@@ -31,6 +31,7 @@ class UserPassage(models.Model):
     content = CKEditor5Field(config_name='extends')
     note = CKEditor5Field(config_name='extends')
     audience = models.CharField(max_length=15, choices=ghelp.list_to_tuple(CHOICE.AUDIENCE))
+    hide_from_mine_profile = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:

@@ -1,9 +1,6 @@
 from word import models as MODELS_WORD
 from word_meaning import models as MODELS_MEAN
-from example import models as MODELS_EXAM
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from word.serializers.GET import serializer as SR_WORD
+from django.shortcuts import redirect
 
 def add_word_meaning(request, word_id=None):
     if request.method == 'POST':

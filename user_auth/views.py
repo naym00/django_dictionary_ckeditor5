@@ -14,11 +14,14 @@ def user_register(request):
         'nav_links': {
             'auth': {
                 'home': ghelp.nav_links(key='home', user=request.user),
-                'logout': ghelp.nav_links(key='logout')
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
+                'words': ghelp.nav_links(key='words'),
+                'word_details': ghelp.nav_links(key='word_details'),
             },
             'unauth': {
                 'home': ghelp.nav_links(key='home'),
-                'login': ghelp.nav_links(key='login')
+                'login': ghelp.nav_links(key='login'),
             }
         },
         'field': {
@@ -106,12 +109,15 @@ def user_login(request):
         'nav_links': {
             'auth': {
                 'home': ghelp.nav_links(key='home', user=request.user),
-                'logout': ghelp.nav_links(key='logout')
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
+                'words': ghelp.nav_links(key='words'),
+                'word_details': ghelp.nav_links(key='word_details'),
             },
             'unauth': {
                 'home': ghelp.nav_links(key='home'),
                 'register': ghelp.nav_links(key='register'),
-                'forgot_password': ghelp.nav_links(key='forgot_password')
+                'forgot_password': ghelp.nav_links(key='forgot_password'),
             }
         },
         'field': {
@@ -146,6 +152,20 @@ def forgot_password(request):
     context = {
         'title': 'Forgot Password',
         'user': request.user,
+        'nav_links': {
+            'auth': {
+                'home': ghelp.nav_links(key='home', user=request.user),
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
+                'words': ghelp.nav_links(key='words'),
+                'word_details': ghelp.nav_links(key='word_details'),
+            },
+            'unauth': {
+                'home': ghelp.nav_links(key='home'),
+                'login': ghelp.nav_links(key='login'),
+                'register': ghelp.nav_links(key='register'),
+            }
+        },
         'field': {
             'email': ''
         },
@@ -181,6 +201,20 @@ def set_new_password(request):
     context = {
         'title': 'Set Password',
         'user': request.user,
+        'nav_links': {
+            'auth': {
+                'home': ghelp.nav_links(key='home', user=request.user),
+                'view_passage': ghelp.nav_links(key='view_passage'),
+                'add_passage': ghelp.nav_links(key='add_passage'),
+                'words': ghelp.nav_links(key='words'),
+                'word_details': ghelp.nav_links(key='word_details'),
+            },
+            'unauth': {
+                'home': ghelp.nav_links(key='home'),
+                'login': ghelp.nav_links(key='login'),
+                'register': ghelp.nav_links(key='register'),
+            }
+        },
         'field': {
             'otp': '',
             'password': ''

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from word import models as MODELS_WORD
 from word_meaning.serializers.GET.serializer import WordMeaningSerializer
 from example.serializers.GET.serializer import ExampleSerializer
+from user.serializers.GET.serializer import UserSerializer
 
 class ComplexityLevelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,7 +13,7 @@ class ComplexityLevelSerializer(serializers.ModelSerializer):
 class WordSerializer(serializers.ModelSerializer):
     meanings = WordMeaningSerializer(many=True)
     examples = ExampleSerializer(many=True)
-    
+    added_by = UserSerializer(many=False)
     class Meta:
         model = MODELS_WORD.Word
         fields='__all__'

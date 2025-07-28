@@ -36,19 +36,15 @@ class N(O):
     
     def nav_links(self, key='home', user=None):
         links = {
-            'home': {'level': 'Home' if user == None else user.short_name if user.is_authenticated else 'Home', 'link': '/'},
-            'login': {'level': 'Login', 'link': '/auth/login'},
-            'register': {'level': 'Register', 'link': '/auth/register'},
-            'logout': {'level': 'Logout', 'link': '/auth/logout'},
-            'forgot_password': {'level': 'Forgot Password', 'link': '/auth/forgot-password'},
-            'words': {'level': 'Word-Meaning', 'link': '/word/words'},
-            'word_details': {'level': 'Word-Meaning-Example', 'link': '/word/word-details'},
-            'easy_words': {'level': 'Easy', 'link': '/word/easy-words'},
-            'medium_words': {'level': 'Medium', 'link': '/word/medium-words'},
-            'hard_words': {'level': 'Hard', 'link': '/word/hard-words'},
-            'new_words': {'level': 'New Words', 'link': '/word/new-words'},
-            'view_passage': {'level': 'View Passage', 'link': '/passage/get-passages'},
-            'add_passage': {'level': 'Add Passage', 'link': '/passage/add-passage'},
+            'home': {'level': 'Home' if user == None else user.short_name if user.is_authenticated else 'Home', 'link': '/', 'name': 'home'},
+            'login': {'level': 'Login', 'link': '/auth/login/', 'name': 'login'},
+            'register': {'level': 'Register', 'link': '/auth/register/', 'name': 'register'},
+            'logout': {'level': 'Logout', 'link': '/auth/logout/', 'name': 'logout'},
+            'forgot_password': {'level': 'Forgot Password', 'link': '/auth/forgot-password/', 'name': 'forgot-password'},
+            'words': {'level': 'Word-Meaning', 'link': '/word/words/', 'name': 'preview-words'},
+            'word_details': {'level': 'Word-Meaning-Example', 'link': '/word/word-details/', 'name': 'word-details'},
+            'view_passage': {'level': 'View Passage', 'link': '/passage/get-passages/', 'name': 'get-passages'},
+            'add_passage': {'level': 'Add Passage', 'link': '/passage/add-passage/', 'name': 'add-passage'},
         }
         return links[key] if key in links else '#'
     

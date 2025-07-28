@@ -1,0 +1,17 @@
+GET http://127.0.0.1:8000/word/words/?word_type=all
+Content-Type: application/json
+
+{}
+###
+
+GET https://lingva.ml/api/v1/en/bn/dismantle
+Content-Type: application/json
+
+{}
+###
+
+POST http://127.0.0.1:8000/api/primitive/add-author/
+Content-Type: application/json
+
+{"name": "Mike Heris", "email": "mike@example.com", "bio": "Swimming Athlet", "is_active": false}
+###

@@ -3,110 +3,237 @@
 
 
 {% block navbar %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light position-sticky top-0">
-  {% if user.is_authenticated  %}
-    <a class="navbar-brand" href="{{nav_links.auth.home.link}}">{{nav_links.auth.home.level}}</a>
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="{{nav_links.auth.logout.link}}">{{nav_links.auth.logout.level}}</a>
-        </li>
-      </ul>
-    </div>
-  {% else %}
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="{{nav_links.unauth.home.link}}">{{nav_links.unauth.home.level}}</a>
-        </li>
-        <li class="nav-item">
-        <a class="nav-link" href="{{nav_links.unauth.login.link}}">{{nav_links.unauth.login.level}}</a>
-        </li>
-      </ul>
-    </div>
-  {% endif %}
-  
-  
-</nav>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark position-sticky top-0">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url nav_links.auth.home.name %}">{{nav_links.auth.home.level}}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.home.name %}">Home</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="passagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Passages</a>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="passagesDropdown">
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.view_passage.name %}">{{nav_links.auth.view_passage.level}}</a></li>
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.add_passage.name %}">{{nav_links.auth.add_passage.level}}</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="previewWordsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Preview Words</a>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="previewWordsDropdown">
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.words.name %}">{{nav_links.auth.words.level}}</a></li>
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.word_details.name %}">{{nav_links.auth.word_details.level}}</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.home.name %}">{{nav_links.unauth.home.level}}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.login.name %}">{{nav_links.unauth.login.level}}</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
 {% endblock %}
 
 {% block body %}
-<div class="d-flex justify-content-center mt-3">
-  {% if not user.is_authenticated  %}
-    <div class="w-25">
-      <form method="POST" action="{% url 'register' %}">
-        {% csrf_token %}
-        <!-- Name input -->
-        <div class="form-outline mb-3 d-flex gap-3">
-          <div>
-            <input type="text" class="form-control" value="{{field.first_name}}" name="firstName" placeholder="First Name" required/>
+  <div class="container">
+    <div class="row justify-content-center mt-3">
+      {% if not user.is_authenticated %}
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+          <div class="card p-3 p-md-4 shadow-sm">
+            <h2 class="text-center mb-4">Create Account</h2>
+            <form method="POST" action="{% url 'register' %}">
+              {% csrf_token %}
+              
+              <!-- Name inputs - stacked on mobile, side-by-side on larger screens -->
+              <div class="row mb-3">
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                  <input type="text" class="form-control" value="{{field.first_name}}" name="firstName" placeholder="First Name" required/>
+                </div>
+                <div class="col-12 col-md-6">
+                  <input type="text" class="form-control" value="{{field.last_name}}" name="lastName" placeholder="Last Name" required/>
+                </div>
+              </div>
+
+              <!-- Username input -->
+              <div class="mb-3">
+                <input id="username" type="text" class="form-control" style="text-transform: lowercase;" value="{{field.username}}" placeholder="Username" name="username" oninput="uniqueUsernameCheck()" required/>
+                {% if error.username %}
+                  <span class="text-danger small">{{error.username}}</span>
+                {% endif %}
+              </div>
+
+              <!-- Email input -->
+              <div class="mb-3">
+                <input type="email" class="form-control" value="{{field.email}}" placeholder="Email" name="email" required/>
+                {% if error.email %}
+                  <span class="text-danger small">{{error.email}}</span>
+                {% endif %}
+              </div>
+
+              <!-- Phone input -->
+              <div class="mb-3">
+                <input type="text" class="form-control" value="{{field.phone}}" placeholder="Phone" name="phone"/>
+                {% if error.phone %}
+                  <span class="text-danger small">{{error.phone}}</span>
+                {% endif %}
+              </div>
+
+              <!-- Password inputs -->
+              <div class="row mb-3">
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                  <input type="password" class="form-control" value="{{field.password}}" placeholder="Password" name="password" required/>
+                </div>
+                <div class="col-12 col-md-6">
+                  <input type="password" class="form-control" value="{{field.confirm_password}}" placeholder="Confirm password" name="confirmPassword" required/>
+                  {% if error.password %}
+                    <span class="text-danger small">{{error.password}}</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Gender selection - stacked on mobile, inline on desktop -->
+              <div class="mb-4">
+                <div class="d-flex flex-row flex-md-row justify-content-between gap-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" id="gender1" value="Male" name="gender" {% if field.gender == "Male" %}checked{% endif %}>
+                    <label class="form-check-label" for="gender1">Male</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" id="gender2" value="Female" name="gender" {% if field.gender == "Female" %}checked{% endif %}>
+                    <label class="form-check-label" for="gender2">Female</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" id="gender3" value="Other" name="gender" {% if field.gender == "Other" %}checked{% endif %}>
+                    <label class="form-check-label" for="gender3">Other</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit button -->
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">Register</button>
+              </div>
+            </form>
           </div>
-          <div>
-            <input type="text" class="form-control" value="{{field.last_name}}" name="lastName" placeholder="Last Name" required/>
-          </div>
         </div>
-
-        <!-- Username input -->
-        <div class="form-outline mb-3">
-          <input id="username" type="text" class="form-control" style="text-transform: lowercase;"  value="{{field.username}}" placeholder="Username" name="username" oninput="uniqueUsernameCheck()" required/>
-          {% if error.username %}
-            <span style="color: red;">{{error.username}}</span>
-          {% endif %}
+      {% else %}
+        <div class="col-12 text-center py-5">
+          <h1 class="h3 mb-3">{{user.full_name}}, You are already logged in</h1>
+          <a href="/" class="btn btn-primary">Go to Home</a>
         </div>
-
-        <!-- Email input -->
-        <div class="form-outline mb-3">
-          <input type="email" class="form-control" value="{{field.email}}" placeholder="Email" name="email" required/>
-          {% if error.email %}
-            <span style="color: red;">{{error.email}}</span>
-          {% endif %}
-        </div>
-
-        <!-- Phone input -->
-        <div class="form-outline mb-3">
-          <input type="text" class="form-control" value="{{field.phone}}" placeholder="Phone" name="phone"/>
-          {% if error.phone %}
-            <span style="color: red;">{{error.phone}}</span>
-          {% endif %}
-        </div>
-
-        <!-- Password input -->
-        <div class="form-outline mb-3">
-          <input type="password" class="form-control" value="{{field.password}}" placeholder="Password" name="password" required/>
-        </div>
-
-        <!-- Confirm Password input -->
-        <div class="form-outline mb-3">
-          <input type="password" class="form-control" value="{{field.confirm_password}}" placeholder="Confirm password" name="confirmPassword" required/>
-          {% if error.password %}
-            <span style="color: red;">{{error.password}}</span>
-          {% endif %}
-        </div>
-
-        <div class="form-outline mb-3">
-          <div class="d-flex justify-content-between">
-            <div class="form-check">
-              <input class="form-check-input" type="radio" id="gender1" value="Male" name="gender" {% if field.gender == "Male" %}checked{% endif %}>
-              <label class="form-check-label" for="gender1">Male</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" id="gender2" value="Female" name="gender" {% if field.gender == "Female" %}checked{% endif %}>
-              <label class="form-check-label" for="gender2">Female</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" id="gender3" value="Other" name="gender" {% if field.gender == "Other" %}checked{% endif %}>
-              <label class="form-check-label" for="gender3">Other</label>
-            </div>
-          </div>
-        </div>
-
-
-        <!-- Submit button -->
-        <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-3">Sign in</button>
-      </form>
+      {% endif %}
     </div>
-  {% else %}
-    <h1>{{user.full_name}}, You are already logged In.</h1>
-  {% endif %}
-</div>
+  </div>
+
+  <script>
+    function uniqueUsernameCheck() {
+        const username = document.getElementById('username').value;
+        if (username != ''){
+            fetch(`http://127.0.0.1:8000/user/unique-username/${username}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.is_exist) {
+                    console.log('Username Exists')
+                    document.getElementById("username").innerHTML = "Already Exist"
+                }
+                else {
+                    console.log('Username doesn\'t Exist')
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+        }
+    }
+</script>
 {% endblock %}
+
+{% comment %} {% block body %}
+  <div class="d-flex justify-content-center mt-3">
+    {% if not user.is_authenticated  %}
+      <div class="w-25">
+        <form method="POST" action="{% url 'register' %}">
+          {% csrf_token %}
+          <!-- Name input -->
+          <div class="form-outline mb-3 d-flex gap-3">
+            <div>
+              <input type="text" class="form-control" value="{{field.first_name}}" name="firstName" placeholder="First Name" required/>
+            </div>
+            <div>
+              <input type="text" class="form-control" value="{{field.last_name}}" name="lastName" placeholder="Last Name" required/>
+            </div>
+          </div>
+
+          <!-- Username input -->
+          <div class="form-outline mb-3">
+            <input id="username" type="text" class="form-control" style="text-transform: lowercase;"  value="{{field.username}}" placeholder="Username" name="username" oninput="uniqueUsernameCheck()" required/>
+            {% if error.username %}
+              <span style="color: red;">{{error.username}}</span>
+            {% endif %}
+          </div>
+
+          <!-- Email input -->
+          <div class="form-outline mb-3">
+            <input type="email" class="form-control" value="{{field.email}}" placeholder="Email" name="email" required/>
+            {% if error.email %}
+              <span style="color: red;">{{error.email}}</span>
+            {% endif %}
+          </div>
+
+          <!-- Phone input -->
+          <div class="form-outline mb-3">
+            <input type="text" class="form-control" value="{{field.phone}}" placeholder="Phone" name="phone"/>
+            {% if error.phone %}
+              <span style="color: red;">{{error.phone}}</span>
+            {% endif %}
+          </div>
+
+          <!-- Password input -->
+          <div class="form-outline mb-3">
+            <input type="password" class="form-control" value="{{field.password}}" placeholder="Password" name="password" required/>
+          </div>
+
+          <!-- Confirm Password input -->
+          <div class="form-outline mb-3">
+            <input type="password" class="form-control" value="{{field.confirm_password}}" placeholder="Confirm password" name="confirmPassword" required/>
+            {% if error.password %}
+              <span style="color: red;">{{error.password}}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-outline mb-3">
+            <div class="d-flex justify-content-between">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="gender1" value="Male" name="gender" {% if field.gender == "Male" %}checked{% endif %}>
+                <label class="form-check-label" for="gender1">Male</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="gender2" value="Female" name="gender" {% if field.gender == "Female" %}checked{% endif %}>
+                <label class="form-check-label" for="gender2">Female</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="gender3" value="Other" name="gender" {% if field.gender == "Other" %}checked{% endif %}>
+                <label class="form-check-label" for="gender3">Other</label>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Submit button -->
+          <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-3">Sign in</button>
+        </form>
+      </div>
+    {% else %}
+      <h1>{{user.full_name}}, You are already logged In.</h1>
+    {% endif %}
+  </div>
+{% endblock %} {% endcomment %}

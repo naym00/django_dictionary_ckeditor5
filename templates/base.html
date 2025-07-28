@@ -47,15 +47,13 @@
             color: transparent;
             transition: opacity 0.3s ease;
         }
-        .passage-title {
-            width: 500px;
+        .make-transparent {
+            opacity: 0; /* Initially transparent */
+            transition: opacity 0.5s ease; /* Smooth transition */
         }
-        #countdown {
-            font-size: 24px;
-            font-weight: bold;
-            color: #d9534f;
-            text-align: center;
-            margin: 20px;
+        
+        .make-transparent:hover {
+            opacity: 1; /* Fully visible on hover */
         }
     </style>
     
@@ -80,110 +78,12 @@
                 const input = document.getElementById(inputId);
                 input.className = 'd-flex';
             }
-
-            function togglePassageNote() {
-                const button = document.getElementById('passageNote');
-                const contentDiv = document.getElementById('passageContentDiv');
-                const noteDiv = document.getElementById('passageNoteDiv');
-
-                if (noteDiv.className.includes('d-none')){
-                    button.textContent = 'Hide Note'
-                    contentDiv.className = 'd-flex flex-column w-75';
-                    noteDiv.className = 'd-flex flex-column w-25 mt-5';
-                }
-                else {
-                    button.textContent = 'Show Note'
-                    contentDiv.className = 'd-flex flex-column w-100';
-                    noteDiv.className = 'd-none';
-                }
-            }
-
-            function editpassageNote() {
-                const button = document.getElementById('passageNoteEdit');
-                const form = document.getElementById('editNoteForm');
-                const span = document.getElementById('previewNote');
-                
-                if (form.className.includes('d-none')){
-                    button.textContent = 'Cancel Edit'
-                    form.className='d-block'
-                    span.className='d-none'
-                }
-                else {
-                    button.textContent = 'Edit Note'
-                    form.className='d-none'
-                    span.className='d-block'
-                }
-                
-            }
-
-            function uniqueUsernameCheck() {
-                const username = document.getElementById('username').value;
-                if (username != ''){
-                    fetch(`http://127.0.0.1:8000/user/unique-username/${username}/`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.is_exist) {
-                            console.log('Username Exists')
-                            document.getElementById("username").innerHTML = "Already Exist"
-                        }
-                        else {
-                            console.log('Username doesn\'t Exist')
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching data:', error);
-                    });
-                }
-                
-            }
-
-            function nMinutes(){
-                const currentPath = document.body.dataset.currentPath;
-                if(currentPath == '/auth/set-password/'){
-                    fetch('http://127.0.0.1:8000/settings/get-settings/')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        let timeLeft = data.otp_validation_minutes*60;
-                        const countdownEl = document.getElementById('countdown');
-                        
-                        // Update the countdown every second
-                        const timer = setInterval(function() {
-                            const minutes = Math.floor(timeLeft / 60);
-                            let seconds = timeLeft % 60;
-                            seconds = seconds < 10 ? '0' + seconds : seconds;
-                            countdownEl.innerHTML = `${minutes}:${seconds}`;
-                            timeLeft--;
-                            
-                            if (timeLeft < 0) {
-                                clearInterval(timer);
-                                countdownEl.innerHTML = "Time's up!";
-                                countdownEl.style.color = "#ff0000";
-                            }
-                        }, 1000);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching data:', error);
-                    });
-                }
-            }
-            nMinutes()
         </script>
 
         <script>
             const currentPath = document.body.dataset.currentPath;
             // /passage/add-passage/
             // /passage/edit-passage/4/
-            console.log('--------------- ', currentPath)
             const audienceSelect = document.getElementById('audience');
             const audienceUsers = document.getElementById('audience_users');
             function toggleCustomUsers() {
