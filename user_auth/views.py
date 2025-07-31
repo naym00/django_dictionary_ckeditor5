@@ -17,7 +17,6 @@ def user_register(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
-                'word_details': ghelp.nav_links(key='word_details'),
             },
             'unauth': {
                 'home': ghelp.nav_links(key='home'),
@@ -112,7 +111,6 @@ def user_login(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
-                'word_details': ghelp.nav_links(key='word_details'),
             },
             'unauth': {
                 'home': ghelp.nav_links(key='home'),
@@ -158,7 +156,6 @@ def forgot_password(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
-                'word_details': ghelp.nav_links(key='word_details'),
             },
             'unauth': {
                 'home': ghelp.nav_links(key='home'),
@@ -207,7 +204,6 @@ def set_new_password(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
-                'word_details': ghelp.nav_links(key='word_details'),
             },
             'unauth': {
                 'home': ghelp.nav_links(key='home'),

@@ -4,7 +4,7 @@
 
 {% block navbar %}
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark position-sticky top-0">
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-sticky-top">
       <div class="container-fluid">
           <a class="navbar-brand" href="{% url nav_links.auth.home.name %}">{{nav_links.auth.home.level}}</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -14,18 +14,12 @@
               <ul class="navbar-nav ms-auto">
                   {% if user.is_authenticated %}
                       <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.home.name %}">Home</a></li>
+                      <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.words.name %}">{{nav_links.auth.words.level}}</a></li>
                       <li class="nav-item dropdown">
                           <a class="nav-link dropdown-toggle" href="#" id="passagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Passages</a>
                           <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="passagesDropdown">
                               <li><a class="dropdown-item" href="{% url nav_links.auth.view_passage.name %}">{{nav_links.auth.view_passage.level}}</a></li>
                               <li><a class="dropdown-item" href="{% url nav_links.auth.add_passage.name %}">{{nav_links.auth.add_passage.level}}</a></li>
-                          </ul>
-                      </li>
-                      <li class="nav-item dropdown">
-                          <a class="nav-link dropdown-toggle" href="#" id="previewWordsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Preview Words</a>
-                          <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="previewWordsDropdown">
-                              <li><a class="dropdown-item" href="{% url nav_links.auth.words.name %}">{{nav_links.auth.words.level}}</a></li>
-                              <li><a class="dropdown-item" href="{% url nav_links.auth.word_details.name %}">{{nav_links.auth.word_details.level}}</a></li>
                           </ul>
                       </li>
                       <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.logout.name %}">{{nav_links.auth.logout.level}}</a></li>

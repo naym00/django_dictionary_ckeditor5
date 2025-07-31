@@ -6,17 +6,18 @@ from example import models as MODELS_EXAM
 from word import models as MODELS_WORD
 from passage import models as MODELS_PASS
 from settings import models as MODELS_SETT
+from django.core.paginator import Paginator
 from help.common.generic import ghelp
+from django.http import JsonResponse
 import re
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
-def words(request):
+def get_words(request):
     html_path = 'dictionary/word/words.html'
     filter_dict = {}
-    word_type = request.GET.get('word_type', 'all')
-    if word_type:
-        word_type = word_type.lower()
-        if word_type == 'new':
+    complexity = request.GET.get('complexity', '0')
+    if complexity in ['-1', '0']:
+        if complexity == '-1':
             settings = ghelp.get_settings(MODELS_SETT.Settings)
             if settings:
                 filter_dict.update(
@@ -27,9 +28,9 @@ def words(request):
                         )
                     }
                 )
-        else:
-            if word_type in [item.text.lower() for item in MODELS_WORD.ComplexityLevel.objects.only('text')]:
-                filter_dict.update({'level__text__iexact': word_type})
+    else: filter_dict.update({'level': complexity})
+    
+    serialized_levels = SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     context = {
         'title': 'Words',
         'user': request.user,
@@ -39,7 +40,6 @@ def words(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
-                'word_details': ghelp.nav_links(key='word_details'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {
@@ -48,35 +48,23 @@ def words(request):
                 'register': ghelp.nav_links(key='register'),
             }
         },
-        'words': SR_WORD.UserWordSerializer(request.user.user_words.filter(**filter_dict).order_by('-id'), many=True).data,
-        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
+        'levels': serialized_levels
     }
-    return render(request, html_path, context=context)
-
-@login_required(login_url=ghelp.nav_links(key='login')['link'])
-def word_details(request):
-    html_path = 'dictionary/word/word_details.html'
-    context = {
-        'title': 'Words',
-        'user': request.user,
-        'nav_links': {
-            'auth': {
-                'home': ghelp.nav_links(key='home', user=request.user),
-                'view_passage': ghelp.nav_links(key='view_passage'),
-                'add_passage': ghelp.nav_links(key='add_passage'),
-                'words': ghelp.nav_links(key='words'),
-                'word_details': ghelp.nav_links(key='word_details'),
-                'logout': ghelp.nav_links(key='logout')
-            },
-            'unauth': {
-                'home': ghelp.nav_links(key='home'),
-                'login': ghelp.nav_links(key='login'),
-                'register': ghelp.nav_links(key='register'),
-            }
-        },
-        'words': SR_WORD.UserWordSerializer(request.user.user_words.all().order_by('-id'), many=True).data,
-        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
-    }
+    if request.headers.get('X-Request-Type') == 'Words-Level':
+        page_obj = Paginator(
+                request.user.user_words.filter(**filter_dict).order_by('-id'),
+                int(request.GET.get('page_size', 10))
+            ).get_page(int(request.GET.get('page', 1)))
+        return JsonResponse({
+                'data': {
+                    'words': SR_WORD.UserWordSerializer(page_obj.object_list, many=True).data,
+                    'has_next': page_obj.has_next(),
+                    'has_previous': page_obj.has_previous(),
+                    'page_number': page_obj.number,
+                    'last_page': page_obj.paginator.num_pages
+                },
+                'levels': serialized_levels
+            }, status=200)
     return render(request, html_path, context=context)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
@@ -84,7 +72,7 @@ def add_word(request):
     if request.method == 'POST':
         text = request.POST.get('text')
         pronunciation = request.POST.get('pronunciation')
-        meaning = request.POST.get('meaning')
+        meanings = re.split('[|.,;]', request.POST.get('meaning'))
         example = request.POST.get('example')
         difficult_level = int(request.POST.get('difficult_level'))
         
@@ -97,7 +85,13 @@ def add_word(request):
                 added_by=request.user
             )
         if example != '': MODELS_EXAM.Example.objects.create(sentence=example.strip().capitalize(), word=word_instance, added_by=request.user)
-        MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
+        # MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
+        for meaning in meanings:
+            meaning = meaning.strip()
+            if meaning:
+                word_meaning = word_instance.meanings.filter(text=meaning)
+                if not word_meaning.exists():
+                    MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
 
         user_word = request.user.user_words.filter(word=word_instance)
         if user_word.exists():
@@ -109,7 +103,7 @@ def add_word(request):
                 word=word_instance,
                 level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level)
             )
-    return redirect('preview-words')
+    return redirect('get-words')
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def edit_word(request, id=None):
@@ -125,12 +119,12 @@ def edit_word(request, id=None):
         
         if form_tobe_edited:
             MODELS_WORD.Word.objects.filter(id=id).update(**form_tobe_edited)
-    return redirect('preview-words')
+    return redirect('get-words')
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def delete_word(request, id=None):
     MODELS_WORD.Word.objects.get(id=id).delete()
-    return redirect('preview-words')
+    return redirect('get-words')
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def edit_word_complexity_level(request, id=None):
@@ -138,7 +132,7 @@ def edit_word_complexity_level(request, id=None):
         difficult_level = request.POST.get('difficult_level')
         if difficult_level:
             MODELS_WORD.UserWord.objects.filter(id=id).update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
-    return redirect('preview-words')
+    return redirect('get-words')
 
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])

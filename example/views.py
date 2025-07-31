@@ -12,7 +12,7 @@ def add_example(request, word_id=None):
         if translate_sentence: form_tobe_created.update({'translate_sentence': translate_sentence})
  
         MODELS_EXAM.Example.objects.create(**form_tobe_created)
-    return redirect('preview-words')
+    return redirect('get-words')
 
 def edit_example(request, id=None):
     if request.method == 'POST':
@@ -22,8 +22,8 @@ def edit_example(request, id=None):
         translate_sentence = request.POST.get('translate_sentence')
         if translate_sentence: form_tobe_edited.update({'translate_sentence': translate_sentence})
         MODELS_EXAM.Example.objects.filter(id=id).update(**form_tobe_edited)
-    return redirect('preview-words')
+    return redirect('get-words')
     
 def delete_example(request, id=None):
     MODELS_EXAM.Example.objects.get(id=id).delete()
-    return redirect('preview-words')
+    return redirect('get-words')

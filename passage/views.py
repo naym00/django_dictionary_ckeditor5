@@ -24,7 +24,6 @@ def get_passages(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
-                'word_details': ghelp.nav_links(key='word_details'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {
@@ -53,7 +52,6 @@ def add_passage(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
-                'word_details': ghelp.nav_links(key='word_details'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {
@@ -105,7 +103,6 @@ def edit_passage(request, user_passage_id=None):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
-                'word_details': ghelp.nav_links(key='word_details'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {
@@ -170,7 +167,6 @@ def get_passage_using_id(request, user_passage_id=None):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
-                'word_details': ghelp.nav_links(key='word_details'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {
@@ -194,10 +190,10 @@ def get_passage_using_id(request, user_passage_id=None):
                 user_passage.save()
                 return redirect('get-passage-using-id', user_passage_id=user_passage_id)
     
-    if request.headers.get('X-Requested-With') == 'Word-Complexity-Level':
+    if request.headers.get('X-Request-Type') == 'Word-Complexity-Level':
         # For AJAX requests, return JSON
         return JsonResponse({'html': render_to_string('dictionary/passage/passage_words.html', context, request=request)})
-    elif request.headers.get('X-Requested-With') == 'Selected-Word-Meaning':
+    elif request.headers.get('X-Request-Type') == 'Selected-Word-Meaning':
         meanings = []
         is_own_source = True
         word_text = request.GET.get('word')

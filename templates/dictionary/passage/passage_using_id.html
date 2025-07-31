@@ -8,7 +8,7 @@
 
 {% block navbar %}
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark position-sticky top-0">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url nav_links.auth.home.name %}">{{nav_links.auth.home.level}}</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -18,18 +18,12 @@
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.home.name %}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.words.name %}">{{nav_links.auth.words.level}}</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="passagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Passages</a>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="passagesDropdown">
                                 <li><a class="dropdown-item" href="{% url nav_links.auth.view_passage.name %}">{{nav_links.auth.view_passage.level}}</a></li>
                                 <li><a class="dropdown-item" href="{% url nav_links.auth.add_passage.name %}">{{nav_links.auth.add_passage.level}}</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="previewWordsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Preview Words</a>
-                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="previewWordsDropdown">
-                                <li><a class="dropdown-item" href="{% url nav_links.auth.words.name %}">{{nav_links.auth.words.level}}</a></li>
-                                <li><a class="dropdown-item" href="{% url nav_links.auth.word_details.name %}">{{nav_links.auth.word_details.level}}</a></li>
                             </ul>
                         </li>
                         <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.logout.name %}">{{nav_links.auth.logout.level}}</a></li>
@@ -48,94 +42,76 @@
 {% block body %}
     {% if user.is_authenticated  %}
         {% if passage %}
-            {% comment %} <div>
-                <div class="d-flex">
-                    <form method="POST" action="{% url 'add-word' %}" class="form-inline w-100 d-flex justify-content-between">
-                        {% csrf_token %}
-                        <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
-                        <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="pronunciation" placeholder="Pronunciation">
-                        <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="meaning" placeholder="Meaning" required>
-                        <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="example" placeholder="Example">
-                        <select class="rounded" style="border: 1px solid #a3ada6;" name="difficult_level">
-                            {% for item in level %}
-                                <option value="{{ item.id }}">{{ item.text }}</option>
-                            {% endfor %}
-                        </select>
-                        <button type="submit" class="btn btn-sm"><i class="bi bi-check-lg"></i></button>
-                    </form>
-                </div>
-            </div> {% endcomment %}
-
             <div class="d-flex flex-row gap-2">
                 <div id="passageContentDiv" class="d-flex flex-column">
-                    <div class="d-flex justify-content-center align-items-center make-transparent m-auto" style="position: sticky; top: 57px;">
-                        <div class="bg-secondary rounded m-1 text-light">
-                            <div class="flex flex-row m-2">
+                    <div class="hide-to-short d-flex justify-content-center align-items-center make-transparent m-auto" style="position: sticky; top: 57px;">
+                        <div class="bg-secondary rounded mx-1 text-light">
+                            <div class="flex flex-row mx-2">
                                 <i class="bi bi-eye-fill"></i>
                                 <span>{{passage.audience}}</span>
                             </div>
                         </div>
                         
-                        <a class="bg-secondary rounded m-1 text-light" style="text-decoration: none; cursor: pointer;" href="/passage/edit-passage/{{passage.id}}">
-                            <div class="flex flex-row m-2">
+                        <a class="bg-secondary rounded mx-1 text-light" style="text-decoration: none; cursor: pointer;" href="/passage/edit-passage/{{passage.id}}">
+                            <div class="flex flex-row mx-2">
                                 <i class="bi bi-pencil-square"></i>
                                 <span>Edit Passage</span>
                             </div>
                         </a>
 
-                        <a class="bg-secondary rounded m-1 text-light" style="text-decoration: none; cursor: pointer;" href="/passage/reset-passage/{{passage.id}}">
-                            <div class="flex flex-row m-2">
+                        <a class="bg-secondary rounded mx-1 text-light" style="text-decoration: none; cursor: pointer;" href="/passage/reset-passage/{{passage.id}}">
+                            <div class="flex flex-row mx-2">
                                 <i class="bi bi-arrow-clockwise"></i>
                                 <span>Reset Passage</span>
                             </div>
                         </a>
 
-                        <button class="bg-secondary rounded m-1 text-light" type="button" onclick="togglePassageNote()" style="border: none; cursor: pointer;">
-                            <div id="passageNote" class="flex flex-row m-2">
+                        <button class="bg-secondary rounded mx-1 text-light" type="button" onclick="togglePassageNote()" style="border: none; cursor: pointer;">
+                            <div id="passageNote" class="flex flex-row mx-2">
                                 <i class="bi bi-eye-fill"></i>
                                 <span>Show Note</span>
                             </div>
                         </button>
                     </div>
 
-                    <div class="bg-secondary d-flex justify-content-center align-items-center make-transparent rounded m-auto" style="position: sticky; top: 110px;">
-                        <div class="d-flex justify-content-center align-items-center w-50 m-2">
-                            <form method="POST" action="{% url 'add-word-from-passage' passage.id %}" class="form-inline d-flex justify-content-between gap-1">
+                    <div class="hide-to-short bg-secondary d-flex justify-content-center align-items-center rounded make-transparent m-auto" style="position: sticky; top: 85px;">
+                        <div class="d-flex justify-content-center align-items-center w-50 m-1">
+                            <form method="POST" action="{% url 'add-word-from-passage' passage.id %}" class="form-inline d-flex justify-content-between align-items-center gap-1">
                                 {% csrf_token %}
-                                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
-                                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="meaning" placeholder="Meaning" required>
-                                <select class="rounded" style="border: 1px solid #a3ada6;" name="difficult_level">
+                                <input class="rounded" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
+                                <input class="rounded" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="meaning" placeholder="Meaning" required>
+                                <select class="rounded" style="height: 25px; border: 1px solid #a3ada6;" name="difficult_level">
                                     {% for item in level %}
                                         <option value="{{ item.id }}">{{ item.text }}</option>
                                     {% endfor %}
                                 </select>
-                                <button type="submit" class="btn btn-sm"><i style="font-size: 20px;" class="bi bi-check-circle"></i></button>
+                                <button type="submit" class="btn btn-sm"><i class="bi bi-check-circle"></i></button>
                             </form>
                         </div>
                     </div>
                     
-                    <div class="d-flex justify-content-center align-items-center mt-2">
-                        <span class="h1 font-weight-bold">{{passage.title}}</span>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button class="h1 font-weight-bold" type="button" onclick="hideToShort()" style="background-color: transparent; border: none; cursor: pointer;">{{passage.title}}</button>
                     </div>
                     <div>
                         <span>{{passage.content|safe}}</span>
                     </div>
                 </div>
-                <div id="passageNoteDiv" class="d-none">
+                <div id="passageNoteDiv" class="d-none d-flex flex-column mt-5">
                     <button class="bg-secondary rounded m-1 text-light" type="button" onclick="editpassageNote()" style="border: none; cursor: pointer;">
                         <div id="passageNoteEdit" class="flex flex-row m-2">
                             <i class="bi bi-pen-fill"></i>
                             <span>Edit Note</span>
                         </div>
                     </button>
-                    <form id="editNoteForm" class="d-none" method="POST" action="{% url 'get-passage-using-id' passage.id %}">
+                    <form id="editNoteForm" class="d-none mt-3" method="POST" action="{% url 'get-passage-using-id' passage.id %}">
                         {% csrf_token %}
                         {{form.note}}
                         <input class="bg-secondary rounded m-1 text-light w-100" style="border: none; cursor: pointer;" type="submit" value="Done">
                     </form>
 
 
-                    <span id="previewNote" class="mt-3">{{passage.note|safe}}</span>
+                    <span id="previewNote" class="d-block mt-3">{{passage.note|safe}}</span>
                 </div>
             </div>
 
@@ -164,6 +140,7 @@
         <h1>Login First</h1>
     {% endif %}
 
+
     <script>
         function togglePassageNote() {
             const passageNote = document.getElementById('passageNote');
@@ -172,42 +149,46 @@
 
             if (noteDiv.className.includes('d-none')){
                 passageNote.innerHTML = '<i class="bi bi-eye-slash-fill"></i> <span>Hide Note</span>'
-                contentDiv.className = 'd-flex flex-column';
                 contentDiv.style.width = '60%';
-                noteDiv.className = 'd-flex flex-column mt-5';
                 noteDiv.style.width = '40%';
+                noteDiv.classList.replace('d-none', 'd-block')
             }
             else {
                 passageNote.innerHTML = '<i class="bi bi-eye-fill"></i> <span>Show Note</span>'
-                contentDiv.className = 'd-flex flex-column';
                 contentDiv.style.width = '100%';
-                noteDiv.className = 'd-none';
+                noteDiv.classList.replace('d-block', 'd-none')
             }
         }
-    </script>
-
-    <script>
         function editpassageNote() {
             const passageNoteEdit = document.getElementById('passageNoteEdit');
-            const form = document.getElementById('editNoteForm');
-            const span = document.getElementById('previewNote');
+            const noteForm = document.getElementById('editNoteForm');
+            const previewNote = document.getElementById('previewNote');
             
-            if (form.className.includes('d-none')){
+            if (noteForm.className.includes('d-none')){
                 passageNoteEdit.innerHTML = '<i class="bi bi-x-lg"></i> <span>Cancel Edit</span>'
-                form.className='d-block mt-3'
-                span.className='d-none'
+                noteForm.classList.replace('d-none', 'd-block')
+                previewNote.classList.replace('d-block', 'd-none')
             }
             else {
                 passageNoteEdit.innerHTML = '<i class="bi bi-pen-fill"></i> <span>Edit Note</span>'
-                form.className='d-none'
-                span.className='d-block mt-3'
+                noteForm.classList.replace('d-block', 'd-none')
+                previewNote.classList.replace('d-none', 'd-block')
             }
             
         }
-    </script>
+        function hideToShort() {
+            const divsToHide = document.querySelectorAll('.hide-to-short');
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+            if (divsToHide.length === 0) return;
+
+            const shouldHide = !divsToHide[0].classList.contains('d-none');
+
+            divsToHide.forEach(div => {
+                div.classList.toggle('d-none', shouldHide);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
             // Filter buttons functionality
             const filterButtons = document.querySelectorAll('.filter-btn');
             const wordsContainer = document.getElementById('words-container');
@@ -221,21 +202,15 @@
                     // Get the filter value
                     const complexity = this.dataset.complexity;
                     // Show loading indicator
-                    wordsContainer.innerHTML = '<div class="col-12 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+                    wordsContainer.innerHTML = '<div class="position-absolute top-50 start-50"><div style="height: 100px; width: 100px;" class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
                     
                     // Make AJAX request
-                    fetch(`/passage/get-passage-using-id/${passageId}/?complexity=${complexity}`, {
-                        headers: {
-                            'X-Requested-With': 'Word-Complexity-Level'
-                        }
-                    })
+                    fetch(`/passage/get-passage-using-id/${passageId}/?complexity=${complexity}`, {headers: {'X-Request-Type': 'Word-Complexity-Level'}})
                     .then(response => response.json())
-                    .then(data => {
-                        wordsContainer.innerHTML = data.html;
-                    })
+                    .then(data => wordsContainer.innerHTML = data.html)
                     .catch(error => {
                         console.error('Error:', error);
-                        wordsContainer.innerHTML = '<div class="col-12 text-center text-danger">Error loading words</div>';
+                        wordsContainer.innerHTML = '<div class="position-absolute top-50 start-50 text-danger">Error loading words</div>';
                     });
                 });
             });
@@ -245,61 +220,74 @@
                 // Your existing editField implementation
             };
         });
-    </script>
 
-    <script>
-        document.addEventListener('mouseup', function () {
-            const selectedText = window.getSelection().toString().trim();
+        document.addEventListener('DOMContentLoaded', () => {
             const meaningDiv = document.getElementById('meaning-div');
             const passageId = window.location.pathname.split('/')[3];
-            meaningDiv.innerHTML = ''
-            meaningDiv.removeAttribute('style')
+
+            // Hide meaningDiv initially
             meaningDiv.style.display = 'none';
-            
-            if (selectedText) {
+
+            // Handle text selection
+            document.addEventListener('mouseup', handleTextSelection);
+
+            // Hide tooltip when clicking outside
+            document.addEventListener('mousedown', (e) => {
+                if (!e.target.closest('#meaning-div')) {
+                    meaningDiv.style.display = 'none';
+                }
+            });
+
+            async function handleTextSelection() {
+                const selectedText = window.getSelection().toString().trim();
+                if (!selectedText) return;
+
                 const selection = window.getSelection();
                 const range = selection.getRangeAt(0);
                 const rect = range.getBoundingClientRect();
-                fetch(`/passage/get-passage-using-id/${passageId}/?word=${selectedText}`, {
-                    headers: {'X-Requested-With': 'Selected-Word-Meaning'}
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.meanings) {
-                        if(data.is_own_source){
-                            meaningDiv.style.backgroundColor = '#376164ff'
-                        } else {
-                            meaningDiv.style.backgroundColor = '#661c1cff'
-                        }
-                        data.meanings.forEach(meaning => {
-                            const span = document.createElement('span');
-                            span.textContent = `• ${meaning.text}`;
-                            span.style.margin = '5px'
-                            span.style.color = 'white'
-                            meaningDiv.appendChild(span)
-                        });
-                        meaningDiv.style.removeProperty('display');
-                        meaningDiv.style.display = 'flex';
-                        meaningDiv.style.flexDirection = 'column';
-                        meaningDiv.style.position = 'absolute';
-                        meaningDiv.style.left = `${rect.left + window.scrollX}px`;
-                        meaningDiv.style.top = `${rect.top + window.scrollY - meaningDiv.offsetHeight - 25}px`;
-                        meaningDiv.style.borderRadius = '5px'
-                    }
-                });
-                
-            }
-            
-        });
-        // Hide tooltip when clicking elsewhere
-        document.addEventListener('mousedown', function(e) {
-            if (!e.target.closest('#meaning-div')) {
-                document.getElementById('meaning-div').style.display = 'none';
+
+                // Reset meaningDiv
+                meaningDiv.innerHTML = '';
+                meaningDiv.style.display = 'none';
+
+                try {
+                    const response = await fetch(
+                        `/passage/get-passage-using-id/${passageId}/?word=${selectedText}`,
+                        { headers: { 'X-Request-Type': 'Selected-Word-Meaning' } }
+                    );
+
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const data = await response.json();
+                    if (!data.meanings) return;
+
+                    // Set background color based on source
+                    meaningDiv.style.backgroundColor = data.is_own_source ? '#376164ff' : '#661c1cff';
+
+                    var lineCount = 0
+                    // Add meanings to the div
+                    data.meanings.forEach(meaning => {
+                        const span = document.createElement('span');
+                        span.textContent = `• ${meaning.text}`;
+                        span.style.margin = '5px';
+                        span.style.color = 'white';
+                        meaningDiv.appendChild(span);
+                        lineCount += 1;
+                    });
+
+                    // Position and show the div
+                    Object.assign(meaningDiv.style, {
+                        display: 'flex',
+                        flexDirection: 'column',
+                        position: 'absolute',
+                        left: `${rect.left + window.scrollX}px`,
+                        top: `${rect.top + window.scrollY - meaningDiv.offsetHeight - 30*lineCount}px`,
+                        borderRadius: '5px'
+                    });
+
+                } catch (error) {
+                    console.error('Error fetching word meaning:', error);
+                }
             }
         });
     </script>
@@ -308,7 +296,6 @@
         .passage-title {
             width: 500px;
         }
-        
         .filter-btn {
             padding: 8px 16px;
             margin-right: 10px;
@@ -317,8 +304,10 @@
             background: #f5f5f5;
             border-radius: 4px;
         }
-
-        .filter-btn.active {
+        .filter-btn:hover {
+            background: #b39d9dff;
+        }
+        .active {
             background: #007bff;
             color: white;
             border-color: #007bff;

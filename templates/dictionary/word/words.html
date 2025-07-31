@@ -4,7 +4,7 @@
 
 {% block navbar %}
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark position-sticky top-0">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url nav_links.auth.home.name %}">{{nav_links.auth.home.level}}</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -14,6 +14,7 @@
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.home.name %}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.words.name %}">{{nav_links.auth.words.level}}</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="passagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Passages</a>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="passagesDropdown">
@@ -21,23 +22,6 @@
                                 <li><a class="dropdown-item" href="{% url nav_links.auth.add_passage.name %}">{{nav_links.auth.add_passage.level}}</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="previewWordsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Preview Words</a>
-                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="previewWordsDropdown">
-                                <li><a class="dropdown-item" href="{% url nav_links.auth.words.name %}">{{nav_links.auth.words.level}}</a></li>
-                                <li><a class="dropdown-item" href="{% url nav_links.auth.word_details.name %}">{{nav_links.auth.word_details.level}}</a></li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="difficultyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Select Difficulty</a>
-                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="difficultyDropdown">
-                                {% for item in level %}
-                                    <li><a class="dropdown-item" href="/word/words/?word_type={{item.text}}">{{item.text}}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="/word/words/?word_type=New">New Words</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.logout.name %}">{{nav_links.auth.logout.level}}</a></li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.home.name %}">{{nav_links.unauth.home.level}}</a></li>
@@ -52,123 +36,389 @@
 
 
 {% block body %}
-    <div>
-        <div class="d-flex">
-            <form method="POST" action="{% url 'add-word' %}" class="form-inline w-100 d-flex justify-content-between">
-                {% csrf_token %}
-                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
-                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="pronunciation" placeholder="Pronunciation">
-                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="meaning" placeholder="Meaning" required>
-                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="example" placeholder="Example">
-                <select class="rounded" style="border: 1px solid #a3ada6;" name="difficult_level">
-                    {% for item in level %}
-                        <option value="{{ item.id }}">{{ item.text }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-sm"><i class="bi bi-check-lg"></i></button>
-            </form>
-        </div>
-    </div>
-
-
-    <div class="d-flex justify-content-between flex-wrap mt-3">
-        {% for word in words %}
-        <div class="bg-primary-subtle w-25 d-flex flex-column m-1 rounded-3">
-            <div class="m-2">
-
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <form method="POST" action="{% url 'edit-word' word.word.id %}" class="d-inline d-flex">
-                            {% csrf_token %}
-                            <div id="inputWordText{{ word.id }}" class="d-none">
-                                <input class="transparent-input fw-bold" style="width: 150px;" type="text" value="{{word.word.text}}" name="text" required>
-                            </div>
-                            
-                            <span id="spanWordText{{ word.id }}" class="h6 fw-bold text-decoration-underline">{{word.word.text}}</span>
-                            <button id="buttonSubmitWordText{{ word.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
-                            <div class="btn-group-visibility d-flex align-items-center">
-                                <button id="buttonWordText{{ word.id }}" type="button" onclick="editField('buttonWordText{{ word.id }}', 'buttonSubmitWordText{{ word.id }}', 'spanWordText{{ word.id }}', 'inputWordText{{ word.id }}')" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-pencil"></i></button>
-                            </div>
-                        </form>
-                        
-                        <form method="POST" action="{% url 'edit-word' word.word.id %}" class="d-inline d-flex">
-                            {% csrf_token %}
-                            <div id="inputPronunciation{{ word.id }}" class="d-none">
-                                <input class="transparent-input fw-bold" style="font-size: 11px; width: 120px;" type="text" value="{{word.word.pronunciation}}" name="pronunciation" required>
-                            </div>
-                            <span id="spanPronunciation{{ word.id }}" class="fst-italic" style="font-size: 11px;">{% if word.word.pronunciation %}{{word.word.pronunciation}}{% endif %}</span>
-                            <button id="buttonSubmitPronunciation{{ word.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
-                            <div class="btn-group-visibility d-flex align-items-center">
-                                <button id="buttonPronunciation{{ word.id }}" type="button" onclick="editField('buttonPronunciation{{ word.id }}', 'buttonSubmitPronunciation{{ word.id }}', 'spanPronunciation{{ word.id }}', 'inputPronunciation{{ word.id }}')" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-pencil"></i></button>
-                            </div>
-                        </form>
-                    </div>
-                    <form method="POST" action="{% url 'edit-word-complexity-level' word.id %}" class="d-inline d-flex align-items-center">
-                        {% csrf_token %}
-                        <div class="btn-group-visibility d-flex align-items-center">
-                            <button id="buttonLevel{{ word.id }}" type="button" onclick="editField('buttonLevel{{ word.id }}', 'buttonSubmitLevel{{ word.id }}', 'spanLevel{{ word.id }}', 'inputLevel{{ word.id }}')" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-pencil"></i></button>
-                        </div>
-                        <button id="buttonSubmitLevel{{ word.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
-                        
-                        <div id="inputLevel{{ word.id }}" class="d-none">
-                            <select name="difficult_level" class="transparent-input">
-                                {% for item in level %}
-                                    <option value="{{ item.id }}"
-                                    {% if word.level.id == item.id %}selected{% endif %}
-                                    >{{ item.text }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <span id="spanLevel{{ word.id }}" class="badge" style="background-color: {{word.level.color}}; font-size: 8px;">{{word.level.text}}</span>
-                    </form>
-                </div>
-
-                <div class="rounded-3">
-                    <hr>
-                    {% for meaning in word.word.meanings %}
-                    <div class="d-flex justify-content-between">
-                        <div class="d-flex">
-                            <div style="min-width: 30px; max-width: 30px;"></div>
-                            
-                            <form method="POST" action="{% url 'edit-word-meaning' meaning.id %}" class="d-inline d-flex">
-                                {% csrf_token %}
-                                <div id="inputMeaning{{ meaning.id }}" class="d-none">
-                                    <input class="transparent-input fw-bold" style="width: 150px;" type="text" value="{{meaning.text}}" name="meaning" required>
-                                </div>
-                                <div id="spanMeaning{{ meaning.id }}" class="d-flex align-items-center">
-                                    <span>&#8226; {{meaning.text}}</span>
-                                </div>
-                                <button id="buttonSubmitMeaning{{ meaning.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
-                            </form>
-                        </div>
-                        <div class="btn-group-visibility d-flex align-items-center">
-                            <button id="buttonMeaning{{ meaning.id }}" type="button" onclick="editField('buttonMeaning{{ meaning.id }}', 'buttonSubmitMeaning{{ meaning.id }}', 'spanMeaning{{ meaning.id }}', 'inputMeaning{{ meaning.id }}')" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
-
-                            <form method="POST" action="{% url 'delete-word-meaning' meaning.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button class="btn btn-sm btn-danger" type="submit"><i class="bi bi-trash"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    <div class="make-vanish d-flex">
-                        <div style="min-width: 30px; max-width: 30px;"></div>
-                        <form method="POST" action="{% url 'add-word-meaning' word.word.id %}" class="form-inline w-100 d-flex justify-content-between">
-                            {% csrf_token %}
-                            <input class="transparent-input" type="text" name="meaning" placeholder="New Meaning" required>
-                            <button type="submit" class="btn btn-sm btn-success btn-group-visibility"><i class="bi bi-check-lg"></i></button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="rounded-3">
-                    <div class="d-flex justify-content-end">
-                        <span>{{word.date_time|date}}</span>
-                    </div>
-                </div>
-                
+    <div id="add-word-div" class="container mt-3 d-block">
+        <div class="row">
+            <div class="col-12 col-md-9">
+                <form method="POST" action="{% url 'add-word' %}" class="row form-inline d-flex justify-content-between">
+                    {% csrf_token %}
+                    <input class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
+                    <input class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="pronunciation" placeholder="Pronunciation">
+                    <input class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="meaning" placeholder="Meaning" required>
+                    <input class="rounded col-12 col-md-8" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="example" placeholder="Example">
+                    <select class="rounded col-6 col-md-2" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" name="difficult_level">
+                        {% for level in levels %}
+                            <option value="{{ level.id }}">{{ level.text }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" style="height: 25px; padding: 0;" class="btn btn-sm rounded btn-primary col-6 col-md-2">Submit</button>
+                </form>
+            </div>
+            <div class="col-12 col-md-3 d-flex justify-content-center">
+                <button id="view-details" type="button" class="rounded w-100" onclick="viewDetails()" style="background-color: #a3ada6; border: none; cursor: pointer;">View Details</button>
             </div>
         </div>
-        {% endfor %}
     </div>
+
+    <div class="d-flex flex-column mt-3">
+        <div>
+            <div class="row">
+                <button class="filter-btn col-5 col-md-2 mx-auto active" data-complexity="0">All Words</button>
+                {% for level in levels %}
+                    <button class="filter-btn col-5 col-md-2 mx-auto" data-complexity="{{level.id}}">{{level.text}}</button>
+                {% endfor %}
+                <button class="filter-btn col-5 col-md-2 mx-auto" data-complexity="-1">New Words</button>
+            </div>
+        </div>
+
+        <div class="row mt-3" id="words-container">
+            <!-- Word cards go here -->
+        </div>
+
+        <!-- Pagination controls -->
+        <div class="d-flex flex-column align-items-center">
+            <div class="d-flex justify-content-center">
+                <div id="pagination" class="d-flex flex-row justify-content-center w-100">
+                </div>
+            </div>
+            <button id="hide-add-word" type="button" class="rounded w-25" onclick="hideAddWord()" style="background-color: #a3ada6; border: none; cursor: pointer;">Hide Add Word</button>
+        </div>
+    </div>
+
+    <script>
+        function getComplexity() {
+            let complexity = '0'
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if(btn.className.includes('active')){
+                    complexity = btn.dataset.complexity;
+                }
+            })
+            return complexity;
+        }
+        function getPageNumber() {
+            let pageNumber = '1'
+            document.querySelectorAll('.pagination_btn').forEach(btn => {
+                if(btn.className.includes('bg-primary')){
+                    pageNumber = btn.textContent
+                }
+            })
+            return pageNumber;
+        }
+        function renderWordCard(word, levelOptions = [], makeShort=true) {
+            const wrapper = document.createElement('div');
+            wrapper.className = "col-md-3 col-sm-6";
+            wrapper.innerHTML = `
+                <div class="bg-primary-subtle w-100 d-flex flex-column mb-1 rounded-3">
+                    <div class="m-2">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <!-- Word text form -->
+                                <form method="POST" action="/word/edit-word/${word.word.id}/" class="d-inline d-flex">
+                                    {% csrf_token %}
+                                    <div id="inputWordText${word.id}" class="d-none">
+                                        <input class="transparent-input fw-bold" style="width: 150px;" type="text" value="${word.word.text}" name="text" required>
+                                    </div>
+                                    <span id="spanWordText${word.id}" class="h6 fw-bold text-decoration-underline">${word.word.text}</span>
+                                    <button id="buttonSubmitWordText${word.id}" class="d-none" type="submit" style="border: none; background-color: transparent;"><i class="bi bi-check-lg"></i></button>
+                                    <div class="btn-group-visibility d-flex align-items-center">
+                                        <button id="buttonWordText${word.id}" type="button" onclick="editField('buttonWordText${word.id}', 'buttonSubmitWordText${word.id}', 'spanWordText${word.id}', 'inputWordText${word.id}')" style="border: none; background-color: transparent;"><i class="bi bi-pencil"></i></button>
+                                    </div>
+                                </form>
+
+                                <!-- Pronunciation form -->
+                                ${
+                                    makeShort ? `` : `
+                                        <form method="POST" action="/word/edit-word/${word.word.id}/" class="d-inline d-flex">
+                                            {% csrf_token %}
+                                            <div id="inputPronunciation${word.id}" class="d-none">
+                                                <input class="transparent-input fw-bold" style="font-size: 11px; width: 120px;" type="text" value="${word.word.pronunciation || ''}" name="pronunciation" required>
+                                            </div>
+                                            <span id="spanPronunciation${word.id}" class="fst-italic" style="font-size: 11px;">${word.word.pronunciation || ''}</span>
+                                            <button id="buttonSubmitPronunciation${word.id}" class="d-none" type="submit" style="border: none; background-color: transparent;"><i class="bi bi-check-lg"></i></button>
+                                            <div class="btn-group-visibility d-flex align-items-center">
+                                                <button id="buttonPronunciation${word.id}" type="button" onclick="editField('buttonPronunciation${word.id}', 'buttonSubmitPronunciation${word.id}', 'spanPronunciation${word.id}', 'inputPronunciation${word.id}')" style="border: none; background-color: transparent;"><i class="bi bi-pencil"></i></button>
+                                            </div>
+                                        </form>
+                                    `
+                                }
+                            </div>
+
+                            <!-- Complexity level -->
+                            <form method="POST" action="/word/edit-word-complexity-level/${word.id}/" class="d-inline d-flex align-items-center">
+                                {% csrf_token %}
+                                <div class="btn-group-visibility d-flex align-items-center">
+                                    <button id="buttonLevel${word.id}" type="button" onclick="editField('buttonLevel${word.id}', 'buttonSubmitLevel${word.id}', 'spanLevel${word.id}', 'inputLevel${word.id}')" style="border: none; background-color: transparent;"><i class="bi bi-pencil"></i></button>
+                                </div>
+                                <button id="buttonSubmitLevel${word.id}" class="d-none" type="submit" style="border: none; background-color: transparent;"><i class="bi bi-check-lg"></i></button>
+
+                                <div id="inputLevel${word.id}" class="d-none">
+                                    <select name="difficult_level" class="transparent-input">
+                                        ${levelOptions.map(opt => `
+                                            <option value="${opt.id}" ${opt.id === word.level.id ? "selected" : ""}>${opt.text}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                                <span id="spanLevel${word.id}" class="badge" style="background-color: ${word.level.color}; font-size: 8px;">${word.level.text}</span>
+                            </form>
+                        </div>
+
+                        <!-- Meanings -->
+                        <div class="rounded-3">
+                            ${ makeShort ? `` : `<hr>` }
+                            ${word.word.meanings.map(meaning => `
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex">
+                                        <div style="min-width: 30px; max-width: 30px;"></div>
+                                        <form method="POST" action="/word-meaning/edit-word-meaning/${meaning.id}/" class="d-inline d-flex">
+                                            {% csrf_token %}
+                                            <div id="inputMeaning${meaning.id}" class="d-none">
+                                                <input class="transparent-input fw-bold" style="width: 150px;" type="text" value="${meaning.text}" name="meaning" required>
+                                            </div>
+                                            <div id="spanMeaning${meaning.id}" class="d-flex align-items-center">
+                                                <span style="font-size: 14px;">&#8226; ${meaning.text}</span>
+                                            </div>
+                                            <button id="buttonSubmitMeaning${meaning.id}" class="d-none" type="submit" style="border: none; background-color: transparent;"><i class="bi bi-check-lg"></i></button>
+                                        </form>
+                                    </div>
+                                    <div class="btn-group-visibility d-flex align-items-center">
+                                        <button id="buttonMeaning${meaning.id}" type="button" onclick="editField('buttonMeaning${meaning.id}', 'buttonSubmitMeaning${meaning.id}', 'spanMeaning${meaning.id}', 'inputMeaning${meaning.id}')" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <form method="POST" action="/word-meaning/delete-word-meaning/${meaning.id}/" class="d-inline">
+                                            {% csrf_token %}
+                                            <button class="btn btn-sm btn-danger" type="submit"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </div>
+                            `).join('')}
+
+                            <!-- Add new meaning -->
+                            ${
+                                makeShort ? `` : `
+                                    <div class="make-vanish d-flex">
+                                        <div style="min-width: 30px; max-width: 30px;"></div>
+                                        <form method="POST" action="/word-meaning/add-word-meaning/${word.word.id}/" class="form-inline w-100 d-flex justify-content-between">
+                                            {% csrf_token %}
+                                            <input class="transparent-input" type="text" name="meaning" placeholder="New Meaning" required>
+                                            <button type="submit" class="btn btn-sm btn-success btn-group-visibility"><i class="bi bi-check-lg"></i></button>
+                                        </form>
+                                    </div>
+                                `
+                            }
+                        </div>
+
+                        <!-- Examples -->
+                        ${makeShort ? `` : `
+                        <div class="rounded-3 mt-1">
+                            <hr>
+                            ${word.word.examples.map(example => `
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex">
+                                        <div style="min-width: 30px; max-width: 30px;"></div>
+                                        <form method="POST" action="/example/edit-example/${example.id}/" class="d-inline d-flex">
+                                            {% csrf_token %}
+                                            <div id="inputExample${example.id}" class="d-none">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="d-flex flex-column">
+                                                        <input class="transparent-input" style="width: 150px;" type="text" value="${example.sentence}" name="sentence" required>
+                                                        <input class="transparent-input" style="width: 150px;" type="text" value="${example.translate_sentence}" name="translate_sentence">
+                                                    </div>
+                                                    <button id="buttonSubmitExample${example.id}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="spanExample${example.id}" class="d-flex flex-column">
+                                                <span>&#8226; ${example.sentence}</span>
+                                                <span class="fst-italic text-muted" style="font-size: 12px;">- ${example.translate_sentence}</span>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="btn-group-visibility d-flex align-items-center">
+                                        <button id="buttonExample${example.id}" type="button" onclick="editField('buttonExample${example.id}', 'buttonSubmitExample${example.id}', 'spanExample${example.id}', 'inputExample${example.id}')" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+                                        <form method="POST" action="/example/delete-example/${example.id}/" class="d-inline">
+                                            {% csrf_token %}
+                                            <button class="btn btn-sm btn-danger" type="submit"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </div>
+                            `).join('')}
+
+                            <!-- Add new Example -->
+                            <div class="make-vanish d-flex">
+                                <div style="min-width: 30px; max-width: 30px;"></div>
+                                <form method="POST" action="/example/add-example/${word.word.id}/" class="form-inline w-100 d-flex justify-content-between">
+                                    {% csrf_token %}
+                                    <div>
+                                        <input class="transparent-input" type="text" name="sentence" placeholder="Enter Sentence" required>
+                                        <input class="transparent-input" type="text" name="translate_sentence" placeholder="Translate the Sentence">
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <button type="submit" class="btn btn-sm btn-success btn-group-visibility"><i class="bi bi-check-lg"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Date -->
+                        <div class="rounded-3">
+                            <div class="d-flex justify-content-end">
+                                <span>${new Date(word.date_time).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        `}
+                    </div>
+                </div>
+            `;
+            return wrapper;
+        }
+        function renderPagination(page_number, last_page) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = `
+                ${last_page>11 ? `
+                    ${
+                        [1, 2, 3].includes(page_number) ? `
+                            ${
+                                [...Array(5)].map((_, i) => i + 1).map(number => {
+                                    return number == page_number ? `<button class="pagination_btn bg-primary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${number})"><span style="margin:4px;">${number}</span></button>` : `<button class="pagination_btn bg-secondary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${number})"><span style="margin:4px;">${number}</span></button>`;
+                                }).join('')
+
+                            }
+                            <div class="m-1"><span class="m-2">.</span></div>
+                            <div class="m-1"><span class="m-2">.</span></div>
+                            <div class="m-1"><span class="m-2">.</span></div>
+                            <button class="pagination_btn bg-secondary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${last_page-1})"><span style="margin:4px;">${last_page-1}</span></button>
+                            <button class="pagination_btn bg-secondary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${last_page})"><span style="margin:4px;">${last_page}</span></button>
+                        ` : `
+                            ${
+                                [last_page-2, last_page-1, last_page].includes(page_number) ? `
+                                    <button class="pagination_btn bg-secondary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${1})"><span style="margin:4px;">1</span></button>
+                                    <button class="pagination_btn bg-secondary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${2})"><span style="margin:4px;">2</span></button>
+                                    <div class="m-1"><span class="m-2">.</span></div>
+                                    <div class="m-1"><span class="m-2">.</span></div>
+                                    <div class="m-1"><span class="m-2">.</span></div>
+                                    ${
+                                        [...Array(5)].map((_, i) => last_page - 4 + i).map(number => {
+                                            return number == page_number ? `<button class="pagination_btn bg-primary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${number})"><span style="margin:4px;">${number}</span></button>` : `<button class="pagination_btn bg-secondary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${number})"><span style="margin:4px;">${number}</span></button>`;
+                                        }).join('')
+                                    }
+
+                                ` : `
+                                    <button class="pagination_btn bg-secondary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${1})"><span style="margin:4px;">1</span></button>
+                                    ${
+                                        page_number + 3 == last_page ? `
+                                            <div class="m-1"><span class="m-2">.</span></div>
+                                            <div class="m-1"><span class="m-2">.</span></div>
+                                            <div class="m-1"><span class="m-2">.</span></div>
+                                            <div class="m-1"><span class="m-2">.</span></div>
+                                        ` : `
+                                            ${
+                                                page_number - 3 == 1 ? `` : `
+                                                    <div class="m-1"><span class="m-2">.</span></div>
+                                                    <div class="m-1"><span class="m-2">.</span></div>
+                                                `
+                                            }
+                                        `
+                                    }
+                                    ${
+                                        [...Array(5)].map((_, i) => page_number-2 + i).map(number => {
+                                            return number == page_number ? `<button class="pagination_btn bg-primary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${number})"><span style="margin:4px;">${number}</span></button>` : `<button class="pagination_btn bg-secondary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${number})"><span style="margin:4px;">${number}</span></button>`;
+                                        }).join('')
+                                    }
+                                    ${
+                                        page_number - 3 == 1 ? `
+                                            <div class="m-1"><span class="m-2">.</span></div>
+                                            <div class="m-1"><span class="m-2">.</span></div>
+                                            <div class="m-1"><span class="m-2">.</span></div>
+                                            <div class="m-1"><span class="m-2">.</span></div>
+                                        ` : `
+                                            ${
+                                                page_number + 3 == last_page ? `` : `
+                                                    <div class="m-1"><span class="m-2">.</span></div>
+                                                    <div class="m-1"><span class="m-2">.</span></div>
+                                                `
+                                            }
+                                        `
+                                    }
+                                    
+                                    <button class="pagination_btn bg-secondary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${last_page})"><span style="margin:4px;">${last_page}</span></button>
+                                `
+                            }
+                        `
+                    }
+                ` : [...Array(last_page)].map((_, i) => i + 1).map( number => {
+                    console.log(number, number == page_number)
+                    return number == page_number ? `<button class="pagination_btn bg-primary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${number})"><span style="margin:4px;">${number}</span></button>` : `<button class="pagination_btn bg-secondary rounded m-1" style="border: none; cursor: pointer;" type="button" onclick="wordsPagination(${number})"><span style="margin:4px;">${number}</span></button>`;
+                }).join('')}
+            `
+        }
+        function fetchAndRenderWords(complexity, pageNumber, makeShort=true) {
+            const wordsContainer = document.getElementById('words-container');
+            
+            // Show loading indicator
+            wordsContainer.innerHTML = '<div class="position-absolute top-50 start-50"><div style="height: 100px; width: 100px;" class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            fetch(`/word/words/?complexity=${complexity}&page=${pageNumber}&page_size=${12}`, {headers: {'X-Request-Type': 'Words-Level'}})
+            .then(response => response.json())
+            .then(data => {
+                renderPagination(data.data.page_number, data.data.last_page);
+                wordsContainer.innerHTML = '';
+                const levelOptions = data.levels || [];
+                data.data.words.forEach(word => wordsContainer.appendChild(renderWordCard(word, levelOptions, makeShort)));
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                wordsContainer.innerHTML = '<div class="position-absolute top-50 start-50 text-danger">Error loading words</div>';
+            });
+        }
+        // Words based on complexity(All, Easy, Medium, Hard, New)
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                
+                fetchAndRenderWords(button.dataset.complexity, '1', document.getElementById('view-details').textContent == 'View Details' ? true : false);
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchAndRenderWords('0', '1', document.getElementById('view-details').textContent == 'View Details' ? true : false);
+        });
+        function viewDetails(){
+            button = document.getElementById('view-details')
+            button.textContent = button.textContent == 'View Details' ? 'Hide Details' : 'View Details';
+            let makeShort = document.getElementById('view-details').textContent == 'View Details' ? true : false
+            fetchAndRenderWords(getComplexity(), getPageNumber(), makeShort);
+        }
+        function hideAddWord(){
+            const button = document.getElementById('hide-add-word');
+            const addWordDiv = document.getElementById('add-word-div');
+            if (addWordDiv.className.includes('d-none')){
+                button.innerHTML = 'Show Add Word'
+                addWordDiv.classList.replace('d-none', 'd-block')
+            }
+            else {
+                button.innerHTML = 'Hide Add Word'
+                addWordDiv.classList.replace('d-block', 'd-none')
+            }
+        }
+        function wordsPagination(page_number){
+            fetchAndRenderWords(getComplexity(), page_number, document.getElementById('view-details').textContent == 'View Details' ? true : false);
+        }
+    </script>
+
+    <style>
+        .filter-btn {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        .filter-btn:hover {
+            background: #b39d9dff;
+        }
+        .active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+    </style>
 {% endblock %}
