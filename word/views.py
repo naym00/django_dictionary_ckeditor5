@@ -13,23 +13,9 @@ import re
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def get_words(request):
-    html_path = 'dictionary/word/words.html'
-    filter_dict = {}
-    complexity = request.GET.get('complexity', '0')
-    if complexity in ['-1', '0']:
-        if complexity == '-1':
-            settings = ghelp.get_settings(MODELS_SETT.Settings)
-            if settings:
-                filter_dict.update(
-                    {
-                        'created_at__gte': ghelp.n_days_back_datetime(
-                            n_days=settings.new_word_day_duration,
-                            zone=ghelp.dhaka_timezone
-                        )
-                    }
-                )
-    else: filter_dict.update({'level': complexity})
-    
+    html_path = 'dictionary/word/get-words.html'
+
+    filter_dict = ghelp.prepare_word_filter_dict(MODELS_SETT.Settings, request.GET.get('complexity', '0'), request.GET.get('keyword'))
     serialized_levels = SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     context = {
         'title': 'Words',

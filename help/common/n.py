@@ -41,7 +41,7 @@ class N(O):
             'register': {'level': 'Register', 'link': '/auth/register/', 'name': 'register'},
             'logout': {'level': 'Logout', 'link': '/auth/logout/', 'name': 'logout'},
             'forgot_password': {'level': 'Forgot Password', 'link': '/auth/forgot-password/', 'name': 'forgot-password'},
-            'words': {'level': 'Words', 'link': '/word/words/', 'name': 'get-words'},
+            'words': {'level': 'Words', 'link': '/word/get-words/', 'name': 'get-words'},
             'view_passage': {'level': 'View Passage', 'link': '/passage/get-passages/', 'name': 'get-passages'},
             'add_passage': {'level': 'Add Passage', 'link': '/passage/add-passage/', 'name': 'add-passage'},
         }

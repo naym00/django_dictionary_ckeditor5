@@ -1,4 +1,4 @@
-GET http://127.0.0.1:8000/word/words/?word_type=all
+GET http://127.0.0.1:8000/word/get-words/?word_type=all
 Content-Type: application/json
 
 {}

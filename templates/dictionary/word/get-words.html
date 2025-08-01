@@ -60,14 +60,18 @@
     </div>
 
     <div class="d-flex flex-column mt-3">
-        <div>
+        <div class="d-flex flex-column gap-2">
             <div class="row">
-                <button class="filter-btn col-5 col-md-2 mx-auto active" data-complexity="0">All Words</button>
+                <button class="filter-btn col-5 col-md-2 mx-auto active" data-complexity="0">Mixed</button>
                 {% for level in levels %}
                     <button class="filter-btn col-5 col-md-2 mx-auto" data-complexity="{{level.id}}">{{level.text}}</button>
                 {% endfor %}
-                <button class="filter-btn col-5 col-md-2 mx-auto" data-complexity="-1">New Words</button>
             </div>
+            <div class="form-check form-switch mx-auto">
+                <input class="form-check-input" type="checkbox" id="newWordsSwitch">
+                <label class="form-check-label" for="newWordsSwitch">New</label>
+            </div>
+            {% comment %} <button class="filter-btn col-5 col-md-2 mx-auto" data-keyword="new">New Words</button> {% endcomment %}
         </div>
 
         <div class="row mt-3" id="words-container">
@@ -102,6 +106,9 @@
                 }
             })
             return pageNumber;
+        }
+        function getChecked(id, key) {
+            return document.getElementById(id).checked ? key: ``;
         }
         function renderWordCard(word, levelOptions = [], makeShort=true) {
             const wrapper = document.createElement('div');
@@ -348,12 +355,12 @@
                 }).join('')}
             `
         }
-        function fetchAndRenderWords(complexity, pageNumber, makeShort=true) {
+        function fetchAndRenderWords(complexity, pageNumber, keyword='', makeShort=true) {
             const wordsContainer = document.getElementById('words-container');
             
             // Show loading indicator
             wordsContainer.innerHTML = '<div class="position-absolute top-50 start-50"><div style="height: 100px; width: 100px;" class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
-            fetch(`/word/words/?complexity=${complexity}&page=${pageNumber}&page_size=${12}`, {headers: {'X-Request-Type': 'Words-Level'}})
+            fetch(`/word/get-words/?complexity=${complexity}&keyword=${keyword}&page=${pageNumber}&page_size=${12}`, {headers: {'X-Request-Type': 'Words-Level'}})
             .then(response => response.json())
             .then(data => {
                 renderPagination(data.data.page_number, data.data.last_page);
@@ -374,17 +381,17 @@
                     filterButtons.forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
                 
-                fetchAndRenderWords(button.dataset.complexity, '1', document.getElementById('view-details').textContent == 'View Details' ? true : false);
+                fetchAndRenderWords(button.dataset.complexity, '1', getChecked('newWordsSwitch', 'new'), document.getElementById('view-details').textContent == 'View Details' ? true : false);
             });
         });
         document.addEventListener("DOMContentLoaded", function () {
-            fetchAndRenderWords('0', '1', document.getElementById('view-details').textContent == 'View Details' ? true : false);
+            fetchAndRenderWords('0', '1', '', document.getElementById('view-details').textContent == 'View Details' ? true : false);
         });
         function viewDetails(){
             button = document.getElementById('view-details')
             button.textContent = button.textContent == 'View Details' ? 'Hide Details' : 'View Details';
             let makeShort = document.getElementById('view-details').textContent == 'View Details' ? true : false
-            fetchAndRenderWords(getComplexity(), getPageNumber(), makeShort);
+            fetchAndRenderWords(getComplexity(), getPageNumber(), getChecked('newWordsSwitch', 'new'), makeShort);
         }
         function hideAddWord(){
             const button = document.getElementById('hide-add-word');
@@ -399,8 +406,11 @@
             }
         }
         function wordsPagination(page_number){
-            fetchAndRenderWords(getComplexity(), page_number, document.getElementById('view-details').textContent == 'View Details' ? true : false);
+            fetchAndRenderWords(getComplexity(), page_number, getChecked('newWordsSwitch', 'new'), document.getElementById('view-details').textContent == 'View Details' ? true : false);
         }
+        document.getElementById('newWordsSwitch').addEventListener('change', function() {
+            fetchAndRenderWords(getComplexity(), getPageNumber(), this.checked ? 'new' : '', document.getElementById('view-details').textContent == 'View Details' ? true : false);
+        });
     </script>
 
     <style>

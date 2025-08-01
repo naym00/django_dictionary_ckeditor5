@@ -23,3 +23,15 @@ class K(L):
         ).select_related('passage', 'user').distinct()[:math.ceil((friend_passages.count()*30)/70)]
         
         return list(chain(friend_passages, non_friend_passages))
+    
+    def update_new_word_filter_dict(self, Settings, filter_dict):
+        settings = self.get_settings(Settings)
+        if settings:
+            filter_dict.update(
+                {
+                    'created_at__gte': self.n_days_back_datetime(
+                        n_days=settings.new_word_day_duration,
+                        zone=self.dhaka_timezone
+                    )
+                }
+            )
