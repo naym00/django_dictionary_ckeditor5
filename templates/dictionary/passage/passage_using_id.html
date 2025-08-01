@@ -79,7 +79,7 @@
                             <form method="POST" action="{% url 'add-word-from-passage' passage.id %}" class="form-inline d-flex justify-content-between align-items-center gap-1">
                                 {% csrf_token %}
                                 <input class="rounded" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
-                                <input class="rounded" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="meaning" placeholder="Meaning" required>
+                                <input class="rounded" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="meanings" placeholder="Meaning" required>
                                 <select class="rounded" style="height: 25px; border: 1px solid #a3ada6;" name="difficult_level">
                                     {% for item in level %}
                                         <option value="{{ item.id }}">{{ item.text }}</option>

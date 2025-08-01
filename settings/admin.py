@@ -3,4 +3,5 @@ from settings import models as MODELS_SETT
 
 admin.site.register([
     MODELS_SETT.Settings,
+    MODELS_SETT.UserSettings,
 ])

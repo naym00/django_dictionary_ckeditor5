@@ -2,6 +2,9 @@
 
 from django.db import migrations, models
 
+def create_initial_settings(apps, schema_editor):
+    Settings = apps.get_model('settings', 'Settings')
+    Settings.objects.create()
 
 class Migration(migrations.Migration):
 
@@ -18,5 +21,9 @@ class Migration(migrations.Migration):
                 ('otp_validation_minutes', models.IntegerField(default=2)),
                 ('new_word_day_duration', models.IntegerField(default=7)),
             ],
+        ),
+        migrations.RunPython(
+            create_initial_settings,
+            create_initial_settings
         ),
     ]

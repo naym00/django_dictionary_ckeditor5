@@ -5,7 +5,9 @@ from user import models as MODELS_USER
 from user_auth import models as MODELS_AUTH
 from settings import models as MODELS_SETT
 from help.common.generic import ghelp
+from django.db import transaction
 
+@transaction.atomic
 def user_register(request):
     html_path = 'dictionary/user_auth/register.html'
     context = {
@@ -95,9 +97,9 @@ def user_register(request):
                     else:
                         prepare_data.update({'password': make_password(password)})
                         user = MODELS_USER.User.objects.create(**prepare_data)
+                        MODELS_SETT.UserSettings.objects.create(user=user)
                         login(request, user)
                         return redirect('home')
-        
     return render(request, html_path, context=context)
 
 def user_login(request):
@@ -171,7 +173,7 @@ def forgot_password(request):
             'error': None
         }
     }
-    settings = ghelp.get_settings(MODELS_SETT.Settings)
+    settings = ghelp.get_general_settings(MODELS_SETT.Settings)
     if settings != None:
         if request.method == "POST":
             email = request.POST.get('email')
@@ -190,7 +192,7 @@ def forgot_password(request):
             else:
                 context['error']['email'] = 'Invalid Email'
                 context['field']['email'] = email
-    else: context['error']['error'] = 'Settings is undone.'
+    else: context['error']['error'] = 'General Settings is undone.'
     return render(request, html_path, context=context)
 
 def set_new_password(request):
@@ -221,7 +223,7 @@ def set_new_password(request):
             'error': None
         }
     }
-    settings = ghelp.get_settings(MODELS_SETT.Settings)
+    settings = ghelp.get_general_settings(MODELS_SETT.Settings)
     if settings != None:
         if request.method == "POST":
             otp = request.POST.get('otp')
@@ -251,7 +253,7 @@ def set_new_password(request):
             else:
                 context['error']['otp'] = 'Invalid OTP'
                 context['field']['otp'] = otp
-    else: context['error']['error'] = 'Settings is undone.' 
+    else: context['error']['error'] = 'General Settings is undone.' 
     return render(request, html_path, context=context)
 
 def user_logout(request):

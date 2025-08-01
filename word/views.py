@@ -2,20 +2,19 @@ from django.contrib.auth.decorators import login_required
 from word.serializers.GET import serializer as SR_WORD
 from word_meaning import models as MODELS_MEAN
 from django.shortcuts import render, redirect
-from example import models as MODELS_EXAM
-from word import models as MODELS_WORD
-from passage import models as MODELS_PASS
-from settings import models as MODELS_SETT
 from django.core.paginator import Paginator
+from example import models as MODELS_EXAM
+from passage import models as MODELS_PASS
+from word import models as MODELS_WORD
 from help.common.generic import ghelp
 from django.http import JsonResponse
-import re
+
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def get_words(request):
     html_path = 'dictionary/word/get-words.html'
 
-    filter_dict = ghelp.prepare_word_filter_dict(MODELS_SETT.Settings, request.GET.get('complexity', '0'), request.GET.get('keyword'))
+    filter_dict = ghelp.prepare_word_filter_dict(request.user, request.GET.get('complexity', '0'), request.GET.get('keyword'), request.GET.get('search'))
     serialized_levels = SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     context = {
         'title': 'Words',
@@ -58,7 +57,6 @@ def add_word(request):
     if request.method == 'POST':
         text = request.POST.get('text')
         pronunciation = request.POST.get('pronunciation')
-        meanings = re.split('[|.,;]', request.POST.get('meaning'))
         example = request.POST.get('example')
         difficult_level = int(request.POST.get('difficult_level'))
         
@@ -71,8 +69,8 @@ def add_word(request):
                 added_by=request.user
             )
         if example != '': MODELS_EXAM.Example.objects.create(sentence=example.strip().capitalize(), word=word_instance, added_by=request.user)
-        # MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
-        for meaning in meanings:
+        
+        for meaning in ghelp.split_word_meanings(request.POST.get('meanings')):
             meaning = meaning.strip()
             if meaning:
                 word_meaning = word_instance.meanings.filter(text=meaning)
@@ -127,7 +125,6 @@ def add_word_from_passage(request, user_passage_id=None):
         user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
         
         text = request.POST.get('text')
-        meanings = re.split('[|.,;]', request.POST.get('meaning'))
         difficult_level = int(request.POST.get('difficult_level'))
         
         
@@ -139,7 +136,7 @@ def add_word_from_passage(request, user_passage_id=None):
                 added_by=request.user
             )
             
-        for meaning in meanings:
+        for meaning in ghelp.split_word_meanings(request.POST.get('meanings')):
             meaning = meaning.strip()
             if meaning:
                 word_meaning = word_instance.meanings.filter(text=meaning)

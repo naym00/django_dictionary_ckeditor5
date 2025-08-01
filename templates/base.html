@@ -52,6 +52,27 @@
             color: transparent;
             transition: opacity 0.3s ease;
         }
+
+        .bordered-input {
+            background: transparent;
+            border: 1px solid #666464ff;
+            border-radius: 5px;
+            transition: border 0.3s ease;
+        }
+        .bordered-input:focus {
+            border: 1px solid #000000;
+            border-radius: 5px;
+            outline: none;
+        }
+        .bordered-input:focus::placeholder {
+            opacity: 0.5;
+            color: #000000;
+        }
+        .bordered-input::placeholder {
+            color: transparent;
+            transition: opacity 0.3s ease;
+        }
+
         .make-transparent {
             opacity: 0; /* Initially transparent */
             transition: opacity 0.5s ease; /* Smooth transition */
@@ -71,6 +92,17 @@
             {% block body %}
             {% endblock %}
         </div>
+
+        <script>
+            function getSettings(type) {
+                return fetch(`http://127.0.0.1:8000/settings/get-${type}-settings/`)
+                    .then(resp => resp.json())
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                        throw error; // Re-throw to handle later
+                    });
+            }
+        </script>
 
         <script>
             function editField(buttonId, buttonSubmitId, spanId, inputId) {

@@ -3,6 +3,7 @@ from datetime import datetime, date, timedelta
 from django.db.models import Q
 from help.common.o import O
 import pytz
+import re
 
 class N(O):
     def get_timezone(self, zone='utc'):
@@ -19,9 +20,13 @@ class N(O):
     def get_unique_code(self):
       return f"{datetime.now().strftime('%Y%m%d%H%M%S%f')}"[:18]
   
-    def get_settings(self, Settings):
+    def get_general_settings(self, Settings):
         settings = Settings.objects.all()
         if settings.exists(): return settings.first()
+        else: return None
+        
+    def get_user_settings(self, loggedin_user):
+        if hasattr(loggedin_user, 'user_setting'): return loggedin_user.user_setting
         else: return None
     
     def send_mail_including_attatchment(self, subject, message, recipient_list, attachments=[], email_from = None):
@@ -58,3 +63,7 @@ class N(O):
     
     def get_fields_name(self, model):
         return [field.name for field in model._meta.get_fields()]
+    
+    def split_word_meanings(self, meanings):
+        if meanings: return re.split('[|/.,;]', meanings)
+        else: return []
