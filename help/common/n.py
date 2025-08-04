@@ -65,5 +65,8 @@ class N(O):
         return [field.name for field in model._meta.get_fields()]
     
     def split_word_meanings(self, meanings):
-        if meanings: return re.split('[|/.,;]', meanings)
+        if meanings: return re.split('[|/·.,;]', meanings.replace('-', ' '))
         else: return []
+        
+    def prepare_text(self, text):
+        return text.strip().replace('-', ' ').capitalize()

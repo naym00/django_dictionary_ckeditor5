@@ -104,7 +104,7 @@
                             <span>Edit Note</span>
                         </div>
                     </button>
-                    <form id="editNoteForm" class="d-none mt-3" method="POST" action="{% url 'get-passage-using-id' passage.id %}">
+                    <form id="editNoteForm" class="d-none mt-3" method="POST" action="{% url 'get-single-passage' passage.id %}">
                         {% csrf_token %}
                         {{form.note}}
                         <input class="bg-secondary rounded m-1 text-light w-100" style="border: none; cursor: pointer;" type="submit" value="Done">
@@ -116,7 +116,7 @@
             </div>
 
 
-            {% if group_of_four_words %}
+            {% if words %}
                 <div class="my-2" style="background-color: #dbd9d3; position: sticky; top: 55px;">
                     <div class="d-flex justify-content-center">
                         <button class="filter-btn active" data-complexity="0">Mixed</button>
@@ -205,7 +205,7 @@
                     wordsContainer.innerHTML = '<div class="position-absolute top-50 start-50"><div style="height: 100px; width: 100px;" class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
                     
                     // Make AJAX request
-                    fetch(`/passage/get-passage-using-id/${passageId}/?complexity=${complexity}`, {headers: {'X-Request-Type': 'Word-Complexity-Level'}})
+                    fetch(`/passage/get-single-passage/${passageId}/?complexity=${complexity}`, {headers: {'X-Request-Type': 'Word-Complexity-Level'}})
                     .then(response => response.json())
                     .then(data => wordsContainer.innerHTML = data.html)
                     .catch(error => {
@@ -252,7 +252,7 @@
 
                 try {
                     const response = await fetch(
-                        `/passage/get-passage-using-id/${passageId}/?word=${selectedText}`,
+                        `/passage/get-single-passage/${passageId}/?word=${selectedText}`,
                         { headers: { 'X-Request-Type': 'Selected-Word-Meaning' } }
                     );
 

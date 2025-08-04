@@ -17,7 +17,8 @@ def add_word_meaning(request, word_id=None):
 def edit_word_meaning(request, id=None):
     if request.method == 'POST':
         meaning = request.POST.get('meaning')
-        MODELS_MEAN.WordMeaning.objects.filter(id=id).update(text=meaning)
+        if meaning:
+            MODELS_MEAN.WordMeaning.objects.filter(id=id).update(text=meaning.replace('-', ' '))
     return redirect('get-words')
     
 def delete_word_meaning(request, id=None):

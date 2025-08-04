@@ -68,7 +68,7 @@
                                             {% for passage in passages %}
                                                 <tr>
                                                     <td>
-                                                        <a style="text-decoration: none;" href="/passage/get-passage-using-id/{{passage.id}}">{{passage.title|truncatechars:20}}</a>
+                                                        <a style="text-decoration: none;" href="/passage/get-single-passage/{{passage.id}}">{{passage.title|truncatechars:20}}</a>
                                                     </td>
                                                     <td class="d-none d-md-table-cell">{{passage.created_at}}</td>
                                                     <td>
@@ -106,7 +106,7 @@
                                             {% for preview_passage in preview_passages %}
                                                 <tr>
                                                     <td>
-                                                        <a class="d-flex flex-column" style="text-decoration: none;" href="/passage/get-passage-using-id/{{preview_passage.id}}">
+                                                        <a class="d-flex flex-column" style="text-decoration: none;" href="/passage/get-single-passage/{{preview_passage.id}}">
                                                             <span>{{preview_passage.passage.title|truncatechars:20}}</span>
                                                             <small class="text-muted">{{preview_passage.user.full_name}}</small>
                                                         </a>

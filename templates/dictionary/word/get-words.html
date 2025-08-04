@@ -41,7 +41,7 @@
             <div class="col-12 col-md-9">
                 <form method="POST" action="{% url 'add-word' %}" class="row form-inline d-flex justify-content-between">
                     {% csrf_token %}
-                    <input class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
+                    <input id="searchInput" class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
                     <input class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="pronunciation" placeholder="Pronunciation">
                     <input class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="meanings" placeholder="Meaning" required>
                     <input class="rounded col-12 col-md-8" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="example" placeholder="Example">
@@ -75,12 +75,9 @@
                         <label class="form-check-label" for="newWordsSwitch">New</label>
                     </div>
                 </div>
-                <div class="d-flex align-items-center">
-                    <div class="d-flex">
-                        <input id="searchInput" class="bordered-input me-2" style="" type="search" placeholder="Search">
-                        <button class="btn btn-sm btn-outline-success" type="button" onclick="displaySearchedWord()">Search</button>
-                    </div>
-                </div>
+                {% comment %} <div class="d-flex align-items-center">
+                    <input id="searchInput" class="bordered-input me-2" style="" type="search" placeholder="Search">
+                </div> {% endcomment %}
             </div>
         </div>
 
@@ -99,6 +96,18 @@
     </div>
 
     <script>
+        function hideAddWord(){
+            const button = document.getElementById('hide-add-word');
+            const addWordDiv = document.getElementById('add-word-div');
+            if (addWordDiv.className.includes('d-none')){
+                button.innerHTML = 'Show Add Word'
+                addWordDiv.classList.replace('d-none', 'd-block')
+            }
+            else {
+                button.innerHTML = 'Hide Add Word'
+                addWordDiv.classList.replace('d-block', 'd-none')
+            }
+        }
         function getComplexity() {
             let complexity = '0'
             document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -392,6 +401,9 @@
                 })
                 .catch(error => console.error('Failed:', error));
         }
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchAndRenderWords('0', '1', '', '', true);
+        });
         // Words based on complexity(All, Easy, Medium, Hard, New)
         const filterButtons = document.querySelectorAll('.filter-btn');
         filterButtons.forEach(button => {
@@ -403,34 +415,26 @@
                 fetchAndRenderWords(button.dataset.complexity, '1', getChecked('newWordsSwitch', 'new'), getSearched(), makeShortStatus());
             });
         });
-        document.addEventListener("DOMContentLoaded", function () {
-            fetchAndRenderWords('0', '1', '', '', true);
-        });
         function viewDetails(){
             button = document.getElementById('view-details')
             button.textContent = button.textContent == 'View Details' ? 'Hide Details' : 'View Details';
             fetchAndRenderWords(getComplexity(), getPageNumber(), getChecked('newWordsSwitch', 'new'), getSearched(), makeShortStatus());
         }
-        function hideAddWord(){
-            const button = document.getElementById('hide-add-word');
-            const addWordDiv = document.getElementById('add-word-div');
-            if (addWordDiv.className.includes('d-none')){
-                button.innerHTML = 'Show Add Word'
-                addWordDiv.classList.replace('d-none', 'd-block')
-            }
-            else {
-                button.innerHTML = 'Hide Add Word'
-                addWordDiv.classList.replace('d-block', 'd-none')
-            }
-        }
+        
         function wordsPagination(page_number){
             fetchAndRenderWords(getComplexity(), page_number, getChecked('newWordsSwitch', 'new'), getSearched(), makeShortStatus());
         }
-        function displaySearchedWord() {
-            fetchAndRenderWords(getComplexity(), '1', getChecked('newWordsSwitch', 'new'), getSearched(), makeShortStatus());
-        }
         document.getElementById('newWordsSwitch').addEventListener('change', function() {
             fetchAndRenderWords(getComplexity(), getPageNumber(), this.checked ? 'new' : '', getSearched(), makeShortStatus());
+        });
+        document.getElementById('searchInput').addEventListener('input', function() {
+            fetchAndRenderWords(
+                getComplexity(),
+                getPageNumber(),
+                '',  // No checkbox-like status
+                this.value.trim(),  // Use typed text
+                makeShortStatus()
+            ).catch(error => console.error('Fetch error:', error));
         });
     </script>
 

@@ -24,12 +24,12 @@ class K(L):
         
         return list(chain(friend_passages, non_friend_passages))
     
-    def update_new_word_filter_dict(self, loggedin_user, filter_dict):
+    def update_new_word_filter_dict(self, attribute, loggedin_user, filter_dict):
         user_settings = self.get_user_settings(loggedin_user)
         if user_settings:
             filter_dict.update(
                 {
-                    'created_at__gte': self.n_days_back_datetime(
+                    attribute: self.n_days_back_datetime(
                         n_days=user_settings.new_word_day_duration,
                         zone=self.dhaka_timezone
                     )

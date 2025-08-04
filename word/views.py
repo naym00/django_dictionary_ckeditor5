@@ -14,7 +14,12 @@ from django.http import JsonResponse
 def get_words(request):
     html_path = 'dictionary/word/get-words.html'
 
-    filter_dict = ghelp.prepare_word_filter_dict(request.user, request.GET.get('complexity', '0'), request.GET.get('keyword'), request.GET.get('search'))
+    filter_dict = ghelp.prepare_word_filter_dict(
+        request.user,
+        {'attribute': 'level', 'value': request.GET.get('complexity', '0')},
+        new={'attribute': 'created_at__gte', 'value': request.GET.get('keyword')},
+        search={'attribute': 'word__text__icontains', 'value': request.GET.get('search')}
+    )
     serialized_levels = SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
     context = {
         'title': 'Words',
@@ -56,37 +61,39 @@ def get_words(request):
 def add_word(request):
     if request.method == 'POST':
         text = request.POST.get('text')
-        pronunciation = request.POST.get('pronunciation')
-        example = request.POST.get('example')
-        difficult_level = int(request.POST.get('difficult_level'))
-        
-        word_instance = MODELS_WORD.Word.objects.filter(text=text.strip().capitalize())
-        if word_instance.exists(): word_instance = word_instance.first()
-        else:
-            word_instance = MODELS_WORD.Word.objects.create(
-                text=text.strip().capitalize(),
-                pronunciation= pronunciation.strip() if pronunciation != '' else None,
-                added_by=request.user
-            )
-        if example != '': MODELS_EXAM.Example.objects.create(sentence=example.strip().capitalize(), word=word_instance, added_by=request.user)
-        
-        for meaning in ghelp.split_word_meanings(request.POST.get('meanings')):
-            meaning = meaning.strip()
-            if meaning:
-                word_meaning = word_instance.meanings.filter(text=meaning)
-                if not word_meaning.exists():
-                    MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
+        if text:
+            text = ghelp.prepare_text(text)
+            pronunciation = request.POST.get('pronunciation')
+            example = request.POST.get('example')
+            difficult_level = int(request.POST.get('difficult_level'))
+            
+            word_instance = MODELS_WORD.Word.objects.filter(text=text)
+            if word_instance.exists(): word_instance = word_instance.first()
+            else:
+                word_instance = MODELS_WORD.Word.objects.create(
+                    text=text,
+                    pronunciation=pronunciation.strip() if pronunciation != '' else None,
+                    added_by=request.user
+                )
+            if example != '': MODELS_EXAM.Example.objects.create(sentence=ghelp.prepare_text(example), word=word_instance, added_by=request.user)
+            
+            for meaning in ghelp.split_word_meanings(request.POST.get('meanings')):
+                meaning = meaning.strip()
+                if meaning:
+                    word_meaning = word_instance.meanings.filter(text=meaning)
+                    if not word_meaning.exists():
+                        MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
 
-        user_word = request.user.user_words.filter(word=word_instance)
-        if user_word.exists():
-            if user_word.first().level.id != difficult_level:
-                user_word.update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
-        else:
-            MODELS_WORD.UserWord.objects.create(
-                user=request.user,
-                word=word_instance,
-                level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level)
-            )
+            user_word = request.user.user_words.filter(word=word_instance)
+            if user_word.exists():
+                if user_word.first().level.id != difficult_level:
+                    user_word.update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
+            else:
+                MODELS_WORD.UserWord.objects.create(
+                    user=request.user,
+                    word=word_instance,
+                    level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level)
+                )
     return redirect('get-words')
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
@@ -95,9 +102,8 @@ def edit_word(request, id=None):
         form_tobe_edited = {}
         text = request.POST.get('text')
         if text:
-            text = text.strip().capitalize()
-            if not MODELS_WORD.Word.objects.filter(text=text).exists():
-                form_tobe_edited.update({'text': text})
+            text = ghelp.prepare_text(text)
+            if not MODELS_WORD.Word.objects.filter(text=text).exists(): form_tobe_edited.update({'text': text})
         pronunciation = request.POST.get('pronunciation')
         if pronunciation: form_tobe_edited.update({'pronunciation': pronunciation})
         
@@ -122,35 +128,32 @@ def edit_word_complexity_level(request, id=None):
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def add_word_from_passage(request, user_passage_id=None):
     if request.method == 'POST':
-        user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
-        
         text = request.POST.get('text')
-        difficult_level = int(request.POST.get('difficult_level'))
-        
-        
-        word_instance = MODELS_WORD.Word.objects.filter(text=text.strip().capitalize())
-        if word_instance.exists(): word_instance = word_instance.first()
-        else:
-            word_instance = MODELS_WORD.Word.objects.create(
-                text=text.strip().capitalize(),
-                added_by=request.user
-            )
+        if text:
+            text = ghelp.prepare_text(text)
+            user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
+            difficult_level = int(request.POST.get('difficult_level'))
             
-        for meaning in ghelp.split_word_meanings(request.POST.get('meanings')):
-            meaning = meaning.strip()
-            if meaning:
-                word_meaning = word_instance.meanings.filter(text=meaning)
-                if not word_meaning.exists():
-                    MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
-        
-        userword = request.user.user_words.filter(word=word_instance)
-        if not userword.exists():
-            MODELS_WORD.UserWord.objects.create(user=request.user, word=word_instance, level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
-        else:
-            if userword.first().level.id != difficult_level:
-                userword.update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
-        
-        passageword = word_instance.word_passages.filter(passage=user_passage.passage.id)
-        if not passageword.exists():
-            MODELS_PASS.PassageWord.objects.create(word=word_instance, passage=MODELS_PASS.Passage.objects.get(id=user_passage.passage.id))
+            
+            word_instance = MODELS_WORD.Word.objects.filter(text=text)
+            if word_instance.exists(): word_instance = word_instance.first()
+            else: word_instance = MODELS_WORD.Word.objects.create(text=text, added_by=request.user)
+                
+            for meaning in ghelp.split_word_meanings(request.POST.get('meanings')):
+                meaning = meaning.strip()
+                if meaning:
+                    word_meaning = word_instance.meanings.filter(text=meaning)
+                    if not word_meaning.exists():
+                        MODELS_MEAN.WordMeaning.objects.create(text=meaning, word=word_instance, added_by=request.user)
+            
+            userword = request.user.user_words.filter(word=word_instance)
+            if not userword.exists():
+                MODELS_WORD.UserWord.objects.create(user=request.user, word=word_instance, level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
+            else:
+                if userword.first().level.id != difficult_level:
+                    userword.update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
+            
+            passageword = word_instance.word_passages.filter(passage=user_passage.passage.id)
+            if not passageword.exists():
+                MODELS_PASS.PassageWord.objects.create(word=word_instance, passage=MODELS_PASS.Passage.objects.get(id=user_passage.passage.id))
     return redirect('get-passage-using-id', user_passage_id=user_passage_id)

@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from word.serializers.GET import serializer as SR_WORD
 from word_meaning.serializers.GET import serializer as SR_MEAN
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
 from passage import models as MODELS_PASS
 from passage import forms as FORMS_PASS
 from word import models as MODELS_WORD
@@ -133,8 +134,8 @@ def edit_passage(request, user_passage_id=None):
                 for user_id in request.POST.getlist('audience_users'):
                     MODELS_PASS.UserPassageShareOnly.objects.create(user_passage=user_passage, user=MODELS_USER.User.objects.get(id=user_id))
                 
-                return redirect('get-passage-using-id', user_passage_id=user_passage_id)
-        else: return redirect('get-passage-using-id', user_passage_id=user_passage_id)
+                return redirect('get-single-passage', user_passage_id=user_passage_id)
+        else: return redirect('get-single-passage', user_passage_id=user_passage_id)
     return render(request, html_path, context=context)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
@@ -144,17 +145,20 @@ def reset_passage(request, user_passage_id=None):
         user_passage.title=user_passage.passage.title
         user_passage.content=user_passage.passage.content
         user_passage.save()
-    return redirect('get-passage-using-id', user_passage_id=user_passage_id)
+    return redirect('get-single-passage', user_passage_id=user_passage_id)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
-def get_passage_using_id(request, user_passage_id=None):
-    html_path = 'dictionary/passage/passage_using_id.html'
+def get_single_passage(request, user_passage_id=None):
+    html_path = 'dictionary/passage/single_passage.html'
     user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
-    
-    complexity = request.GET.get('complexity', '0')
-    filter_dict = {'word__word_passages__passage_id': user_passage.passage.id}
-    if complexity != '0': filter_dict.update({'level__difficulty_level': complexity})
-    
+
+    filter_dict = ghelp.prepare_word_filter_dict(
+        request.user,
+        {'attribute': 'level', 'value': request.GET.get('complexity', '0')},
+        new={'attribute': 'created_at__gte', 'value': request.GET.get('keyword')},
+        search={'attribute': 'word__text__icontains', 'value': request.GET.get('search')},
+        extra={'word__word_passages__passage_id': user_passage.passage.id}
+    )
     word_instances = request.user.user_words.filter(**filter_dict)
     word_serializers = SR_WORD.UserWordSerializer(word_instances.distinct().order_by('-id'), many=True).data
     
@@ -180,7 +184,7 @@ def get_passage_using_id(request, user_passage_id=None):
         'form': FORMS_PASS.CreatePassageNote(initial={
             'note': user_passage.note
         }),
-        'group_of_four_words': [word_serializers[i:i+4] for i in range(0, len(word_serializers), 4)]
+        'words': word_serializers
     }
     if request.method == 'POST':
         if user_passage.user == request.user:
@@ -188,7 +192,7 @@ def get_passage_using_id(request, user_passage_id=None):
             if form.is_valid():
                 user_passage.note=form.cleaned_data['note']
                 user_passage.save()
-                return redirect('get-passage-using-id', user_passage_id=user_passage_id)
+                return redirect('get-single-passage', user_passage_id=user_passage_id)
     
     if request.headers.get('X-Request-Type') == 'Word-Complexity-Level':
         # For AJAX requests, return JSON
