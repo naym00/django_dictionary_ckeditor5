@@ -48,9 +48,42 @@
             <!-- Settings Form -->
             <form method="post" action="{% url 'get-user-settings' %}" novalidate>
                 {% csrf_token %}
+                {% if data.is_admin %}
 
-                
-                {% if is_admin %}
+                <!-- Complexity Levels Field -->
+                <div class="d-flex flex-column mb-4">
+                    <label class="form-label">Complexity Levels</label>
+                    <div id="complexity-containter" class="row">
+                        {% for complexity in data.complexitys %}
+                        <div id="complexity-{{complexity.id}}" class="col-12 my-1 complexities">
+                            <div class="d-flex flex-row bg-secondary rounded">
+                                <input type="text"
+                                    style="width: 35%;"
+                                    class="form-control m-1"
+                                    value="{{complexity.text}}"
+                                    name="complexity_text"
+                                    required>
+                                <input type="text"
+                                    style="width: 35%;"
+                                    class="form-control m-1"
+                                    value="{{complexity.color}}"
+                                    name="complexity_color"
+                                    required>
+                                <input type="hidden" name="complexity_id" value="{{complexity.id}}">
+                                <input type="number"
+                                    style="width: 20%;"
+                                    class="form-control m-1"
+                                    value="{{complexity.difficulty_level}}"
+                                    name="complexity_difficulty_level"
+                                    min="1"
+                                    required>
+                                <button class="m-1" type="button" style="border: none; background-color: transparent;" onclick="removeComplexity('complexity-{{complexity.id}}')"><i class="bi bi-x-circle"></i></button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="bg-primary rounded m-1" type="button" style="border: none;" onclick="addNewComplexityLevel()">Add New Level</button>
+                </div>
 
                 <!-- OTP Validation Minutes Field -->
                 <div class="mb-4">
@@ -65,29 +98,6 @@
                            required>
                 </div>
                 {% endif %}
-                <div class="mb-4">
-                    <div id="complexity-containter" class="row">
-                        {% for complexity in data.complexitys %}
-                        <div id="complexity-{{complexity.id}}" class="col-12 col-md-6 my-1 complexities">
-                            <div class="d-flex flex-row bg-secondary rounded">
-                                <input type="text"
-                                    class="form-control w-50 m-1"
-                                    value="{{complexity.text}}"
-                                    name="complexity_text"
-                                    required>
-                                <input type="number"
-                                    class="form-control w-25 m-1"
-                                    value="{{complexity.difficulty_level}}"
-                                    name="complexity_difficulty_level"
-                                    min="1"
-                                    required>
-                                <button class="w-25 bg-danger rounded m-1" type="button" style="border: none;" onclick="removeComplexity('complexity-{{complexity.id}}')"><i class="bi bi-x-circle"></i></button>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <button class="w-25 bg-primary rounded m-1" type="button" style="border: none;" onclick="addNewComplexityLevel()">Add New Level</button>
-                </div>
                 
                 <!-- New Word Day Duration Field -->
                 <div class="mb-4">
@@ -140,21 +150,29 @@
         function addNewComplexityLevel() {
             const complexityNewId = getComplexityLastId() + 1;
             const child = document.createElement('div');
-            child.className = "col-12 col-md-6 my-1 complexities";
+            child.className = "col-12 my-1 complexities";
             child.id = `complexity-${complexityNewId}`;
             child.innerHTML = `
                 <div class="d-flex flex-row bg-secondary rounded">
                     <input type="text"
-                        class="form-control w-50 m-1"
+                        style="width: 35%;"
+                        class="form-control m-1"
                         name="complexity_text"
                         required>
-                    <input type="number" 
-                        class="form-control w-25 m-1"
-                        name="complexity_difficulty_level"
+                    <input type="text"
+                        style="width: 35%;"
+                        class="form-control m-1"
+                        name="complexity_color"
+                        required>
+                    <input type="hidden" name="complexity_id" value="{{complexity.id}}">
+                    <input type="number"
+                        style="width: 20%;"
+                        class="form-control m-1"
                         value=${complexityNewId}
+                        name="complexity_difficulty_level"
                         min=${complexityNewId}
                         required>
-                    <button class="w-25 bg-danger rounded m-1" type="button" style="border: none;" onclick="removeComplexity('complexity-${complexityNewId}')"><i class="bi bi-x-circle"></i></button>
+                    <button class="m-1" type="button" style="border: none; background-color: transparent;" onclick="removeComplexity('complexity-{{complexity.id}}')"><i class="bi bi-x-circle"></i></button>
                 </div>
             `
             document.getElementById('complexity-containter').appendChild(child)
