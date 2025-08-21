@@ -13,12 +13,13 @@ from django.http import JsonResponse
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def get_words(request):
     html_path = 'dictionary/word/get-words.html'
-
+    
     filter_dict = ghelp.prepare_word_filter_dict(
         request.user,
         {'attribute': 'level', 'value': request.GET.get('complexity', '0')},
         new={'attribute': 'created_at__gte', 'value': request.GET.get('keyword')},
-        search={'attribute': 'word__text__icontains', 'value': request.GET.get('search')}
+        search={'attribute': 'word__text__icontains', 'value': request.GET.get('search')},
+        meaning_search={'attribute': 'word__meanings__text__icontains', 'value': request.GET.get('meaning_search')}
     )
     serialized_levels = SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all().order_by('difficulty_level'), many=True).data
     context = {

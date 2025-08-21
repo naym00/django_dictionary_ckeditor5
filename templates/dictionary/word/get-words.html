@@ -83,9 +83,9 @@
                         <button type="button" style="font-size: 12px; border: none; height: 20px; border-radius: 0 5px 5px 0;" onclick="jumpToPageNo()">Jump To</button>
                     </div>
                 </div>
-                {% comment %} <div class="d-flex align-items-center">
-                    <input id="searchInput" class="bordered-input me-2" style="" type="search" placeholder="Search">
-                </div> {% endcomment %}
+                <div class="d-flex align-items-center">
+                    <input id="searchMeaning" class="form-control me-2" style="border-radius: 5px; height: 20px; width: 150px;" type="search">
+                </div>
             </div>
         </div>
 
@@ -134,11 +134,14 @@
             })
             return pageNumber;
         }
-        function getChecked(id, key) {
-            return document.getElementById(id).checked ? key: ``;
+        function getChecked() {
+            return document.getElementById('newWordsSwitch').checked ? 'new': ``;
         }
         function getSearched() {
             return document.getElementById('searchInput').value;
+        }
+        function getMeaningSearch() {
+            return document.getElementById('searchMeaning').value;
         }
         function makeShortStatus() {
             return document.getElementById('view-details').textContent == 'View Details' ? true : false;
@@ -395,14 +398,14 @@
                 }).join('')}
             `
         }
-        function fetchAndRenderWords(complexity, pageNumber, keyword='', search='', makeShort=true) {
+        function fetchAndRenderWords(complexity, pageNumber, keyword='', search='', meaningSearch='', makeShort=true) {
             const wordsContainer = document.getElementById('words-container');
             // Show loading indicator
             wordsContainer.innerHTML = '<div class="position-absolute top-50 start-50"><div style="height: 100px; width: 100px;" class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
             
             getUserSettings()
                 .then(data => {
-                    fetch(`/word/get-words/?complexity=${complexity}&keyword=${keyword}&search=${search}&page=${pageNumber}&page_size=${data.data.words_per_page}`, {headers: {'X-Request-Type': 'Words-Level'}})
+                    fetch(`/word/get-words/?complexity=${complexity}&keyword=${keyword}&search=${search}&meaning_search=${meaningSearch}&page=${pageNumber}&page_size=${data.data.words_per_page}`, {headers: {'X-Request-Type': 'Words-Level'}})
                     .then(response => response.json())
                     .then(data => {
                         renderPagination(data.data.page_number, data.data.last_page);
@@ -418,7 +421,7 @@
                 .catch(error => console.error('Failed:', error));
         }
         document.addEventListener("DOMContentLoaded", function () {
-            fetchAndRenderWords('0', '1', '', '', true);
+            fetchAndRenderWords('0', '1', '', '', '', true);
         });
         // Words based on complexity(All, Easy, Medium, Hard, New)
         const filterButtons = document.querySelectorAll('.filter-btn');
@@ -428,24 +431,58 @@
                     filterButtons.forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
                 
-                fetchAndRenderWords(button.dataset.complexity, '1', getChecked('newWordsSwitch', 'new'), getSearched(), makeShortStatus());
+                fetchAndRenderWords(
+                    button.dataset.complexity,
+                    '1',
+                    getChecked(),
+                    getSearched(),
+                    getMeaningSearch(),
+                    makeShortStatus()
+                );
             });
         });
         function viewDetails(){
             button = document.getElementById('view-details')
             button.textContent = button.textContent == 'View Details' ? 'Hide Details' : 'View Details';
-            fetchAndRenderWords(getComplexity(), getPageNumber(), getChecked('newWordsSwitch', 'new'), getSearched(), makeShortStatus());
-        }
-        
+            fetchAndRenderWords(
+                getComplexity(),
+                getPageNumber(),
+                getChecked(),
+                getSearched(),
+                getMeaningSearch(),
+                makeShortStatus()
+            );
+        }    
         function wordsPagination(page_number){
-            fetchAndRenderWords(getComplexity(), page_number, getChecked('newWordsSwitch', 'new'), getSearched(), makeShortStatus());
+            fetchAndRenderWords(
+                getComplexity(),
+                page_number,
+                getChecked(),
+                getSearched(),
+                getMeaningSearch(),
+                makeShortStatus()
+            );
         }
         function jumpToPageNo() {
             inputField = document.getElementById('jump-to-id');
-            fetchAndRenderWords(getComplexity(), inputField.value, getChecked('newWordsSwitch', 'new'), getSearched(), makeShortStatus());
+            fetchAndRenderWords(
+                getComplexity(),
+                inputField.value,
+                getChecked(),
+                getSearched(),
+                getMeaningSearch(),
+                makeShortStatus()
+            );
         }
         document.getElementById('newWordsSwitch').addEventListener('change', function() {
-            fetchAndRenderWords(getComplexity(), getPageNumber(), this.checked ? 'new' : '', getSearched(), makeShortStatus());
+            fetchAndRenderWords(
+                getComplexity(),
+                getPageNumber(),
+                this.checked ? 'new' : '',
+                getSearched(),
+                getMeaningSearch(),
+                makeShortStatus()
+            );
         });
         document.getElementById('searchInput').addEventListener('input', function() {
             fetchAndRenderWords(
@@ -453,6 +490,18 @@
                 getPageNumber(),
                 '',  // No checkbox-like status
                 this.value.trim(),  // Use typed text
+                getMeaningSearch(),
+                makeShortStatus()
+            ).catch(error => console.error('Fetch error:', error));
+        });
+        document.getElementById('searchMeaning').addEventListener('input', function() {
+            console.log(this.value.trim())
+            fetchAndRenderWords(
+                getComplexity(),
+                getPageNumber(),
+                '',  // No checkbox-like status
+                getSearched(),
+                this.value.trim(),
                 makeShortStatus()
             ).catch(error => console.error('Fetch error:', error));
         });
