@@ -49,6 +49,7 @@ class N(O):
             'words': {'level': 'Words', 'link': '/word/get-words/', 'name': 'get-words'},
             'view_passage': {'level': 'View Passage', 'link': '/passage/get-passages/', 'name': 'get-passages'},
             'add_passage': {'level': 'Add Passage', 'link': '/passage/add-passage/', 'name': 'add-passage'},
+            'settings': {'level': 'Settings', 'link': '/settings/get-user-settings/', 'name': 'get-user-settings'},
         }
         return links[key] if key in links else '#'
     

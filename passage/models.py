@@ -5,9 +5,15 @@ from word import models as MODELS_WORD
 from help.choice import choice as CHOICE
 from django_ckeditor_5.fields import CKEditor5Field
 
+class IeltsBook(models.Model):
+    title = models.CharField(max_length=50)
+    def __str__(self):
+        return f'{self.id} - {self.title}'
+
 class Passage(models.Model):
     title = models.CharField(max_length=100)
     content = CKEditor5Field(config_name='extends')
+    ielts_book = models.ForeignKey(IeltsBook, on_delete=models.SET_NULL, blank=True, null=True, related_name='ielts_book_passage')
     added_by = models.ForeignKey(MODELS_USER.User, on_delete=models.SET_NULL, blank=True, null=True, related_name='added_by_passage')
     created_at = models.DateTimeField(auto_now_add=True)
     

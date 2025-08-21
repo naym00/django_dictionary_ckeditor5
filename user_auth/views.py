@@ -105,7 +105,7 @@ def user_register(request):
 def user_login(request):
     html_path = 'dictionary/user_auth/login.html'
     context = {
-        'title': 'Register',
+        'title': 'Login',
         'user': request.user,
         'nav_links': {
             'auth': {

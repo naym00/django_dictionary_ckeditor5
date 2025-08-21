@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block title %}{{title}}{% endblock %}
+
+
+{% block navbar %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url nav_links.auth.home.name %}">{{nav_links.auth.home.level}}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.home.name %}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.words.name %}">{{nav_links.auth.words.level}}</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="passagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Passages</a>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="passagesDropdown">
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.view_passage.name %}">{{nav_links.auth.view_passage.level}}</a></li>
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.add_passage.name %}">{{nav_links.auth.add_passage.level}}</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.logout.name %}">{{nav_links.auth.logout.level}}</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.home.name %}">{{nav_links.unauth.home.level}}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.login.name %}">{{nav_links.unauth.login.level}}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.register.name %}">{{nav_links.unauth.register.level}}</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+
+
+{% block body %}
+
+    <div class="container py-5">
+        <div class="settings-container">
+            <!-- Header -->
+            <div class="settings-header text-center">
+                <h1 class="h3 mb-0">Application Settings</h1>
+                <p class="text-muted">Manage your application preferences</p>
+            </div>
+
+            <!-- Settings Form -->
+            <form method="post" action="{% url 'get-user-settings' %}" novalidate>
+                {% csrf_token %}
+
+                
+                {% if is_admin %}
+
+                <!-- OTP Validation Minutes Field -->
+                <div class="mb-4">
+                    <label for="otpValidationMinutes" class="form-label">OTP Validation Minutes</label>
+                    <input type="number" 
+                           class="form-control"
+                           id="otpValidationMinutes"
+                           name="otp_validation_minutes"
+                           value="{{ data.general_Settings.otp_validation_minutes|default:'' }}"
+                           min="1"
+                           max="365"
+                           required>
+                </div>
+                {% endif %}
+                <div class="mb-4">
+                    <div id="complexity-containter" class="row">
+                        {% for complexity in data.complexitys %}
+                        <div id="complexity-{{complexity.id}}" class="col-12 col-md-6 my-1 complexities">
+                            <div class="d-flex flex-row bg-secondary rounded">
+                                <input type="text"
+                                    class="form-control w-50 m-1"
+                                    value="{{complexity.text}}"
+                                    name="complexity_text"
+                                    required>
+                                <input type="number"
+                                    class="form-control w-25 m-1"
+                                    value="{{complexity.difficulty_level}}"
+                                    name="complexity_difficulty_level"
+                                    min="1"
+                                    required>
+                                <button class="w-25 bg-danger rounded m-1" type="button" style="border: none;" onclick="removeComplexity('complexity-{{complexity.id}}')"><i class="bi bi-x-circle"></i></button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="w-25 bg-primary rounded m-1" type="button" style="border: none;" onclick="addNewComplexityLevel()">Add New Level</button>
+                </div>
+                
+                <!-- New Word Day Duration Field -->
+                <div class="mb-4">
+                    <label for="newWordDayDuration" class="form-label">New Word Day Duration</label>
+                    <input type="number" 
+                           class="form-control"
+                           id="newWordDayDuration"
+                           name="new_word_day_duration"
+                           value="{{ data.user_settings.new_word_day_duration|default:'' }}"
+                           min="1"
+                           max="365"
+                           required>
+                </div>
+
+                <!-- Words Per Page Field -->
+                <div class="mb-4">
+                    <label for="wordsPerPage" class="form-label">Words Per Page</label>
+                    <input type="number" 
+                           class="form-control"
+                           id="wordsPerPage"
+                           name="words_per_page"
+                           value="{{ data.user_settings.words_per_page|default:'' }}"
+                           min="1"
+                           required>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Save Settings
+                    </button>
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function getComplexityLastId() {
+            const containers = document.getElementsByClassName('complexities');
+            let allIds = [];
+            for (let i = 0; i < containers.length; i++) {
+                allIds.push(parseInt(containers[i].id.split('-')[1]));
+            }
+            allIds = allIds.sort((a, b) => a - b);
+            return allIds[allIds.length -1];
+        }
+        function addNewComplexityLevel() {
+            const complexityNewId = getComplexityLastId() + 1;
+            const child = document.createElement('div');
+            child.className = "col-12 col-md-6 my-1 complexities";
+            child.id = `complexity-${complexityNewId}`;
+            child.innerHTML = `
+                <div class="d-flex flex-row bg-secondary rounded">
+                    <input type="text"
+                        class="form-control w-50 m-1"
+                        name="complexity_text"
+                        required>
+                    <input type="number" 
+                        class="form-control w-25 m-1"
+                        name="complexity_difficulty_level"
+                        value=${complexityNewId}
+                        min=${complexityNewId}
+                        required>
+                    <button class="w-25 bg-danger rounded m-1" type="button" style="border: none;" onclick="removeComplexity('complexity-${complexityNewId}')"><i class="bi bi-x-circle"></i></button>
+                </div>
+            `
+            document.getElementById('complexity-containter').appendChild(child)
+        }
+
+        function removeComplexity(child_id) {
+            const parent = document.getElementById('complexity-containter')
+            const child = document.getElementById(child_id)
+            if (parent && child) {
+                parent.removeChild(child);
+            }
+        }
+
+        // Add smooth transitions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add focus styles
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                });
+            });
+
+            // Auto-hide alerts after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+    </script>
+    <style>
+        .settings-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .settings-header {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #0056b3, #004085);
+            transform: translateY(-1px);
+        }
+    </style>
+{% endblock %}

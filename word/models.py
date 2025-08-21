@@ -29,3 +29,19 @@ class UserWord(models.Model):
     
     def __str__(self):
         return f'{self.id} - {self.user.username}'
+    
+# class Confusion(models.Model):
+#     user = models.ForeignKey(MODELS_USER.User, on_delete=models.CASCADE, related_name='user_confusions')
+#     text = models.CharField(max_length=100, blank=True, null=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
+    
+#     def __str__(self):
+#         return f'{self.id} - {self.user.username}'
+    
+# class ConfusionWord(models.Model):
+#     confusion = models.ForeignKey(Confusion, on_delete=models.CASCADE, related_name='confusion_words')
+#     word = models.ForeignKey(Word, on_delete=models.CASCADE, related_name='word_confusion_words')
+#     created_at = models.DateTimeField(auto_now_add=True)
+    
+#     def __str__(self):
+#         return f'{self.id} - {self.confusion.user.username}'

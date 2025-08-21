@@ -24,6 +24,7 @@
                                 <li><a class="dropdown-item" href="{% url nav_links.auth.add_passage.name %}">{{nav_links.auth.add_passage.level}}</a></li>
                             </ul>
                         </li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.settings.name %}">{{nav_links.auth.settings.level}}</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.logout.name %}">{{nav_links.auth.logout.level}}</a></li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.home.name %}">{{nav_links.unauth.home.level}}</a></li>

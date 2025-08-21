@@ -13,6 +13,7 @@ def home(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
+                'settings': ghelp.nav_links(key='settings'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {

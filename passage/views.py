@@ -11,6 +11,7 @@ from help.common.generic import ghelp
 from help.choice import choice as CHOICE
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from passage.services import passage_service
 import requests
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
@@ -25,6 +26,7 @@ def get_passages(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
+                'settings': ghelp.nav_links(key='settings'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {
@@ -53,6 +55,7 @@ def add_passage(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
+                'settings': ghelp.nav_links(key='settings'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {
@@ -104,6 +107,7 @@ def edit_passage(request, user_passage_id=None):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
+                'settings': ghelp.nav_links(key='settings'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {
@@ -147,20 +151,75 @@ def reset_passage(request, user_passage_id=None):
         user_passage.save()
     return redirect('get-single-passage', user_passage_id=user_passage_id)
 
+# @login_required(login_url=ghelp.nav_links(key='login')['link'])
+# def get_single_passage(request, user_passage_id=None):
+#     html_path = 'dictionary/passage/single_passage.html'
+#     user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
+    
+#     word_instances = passage_service.get_user_passage_words(request, user_passage)
+#     word_serializers = passage_service.serialized_user_passage_words(word_instances)
+    
+#     context = {
+#         'title': 'Single Passage',
+#         'user': request.user,
+#         'nav_links': {
+#             'auth': {
+#                 'home': ghelp.nav_links(key='home', user=request.user),
+#                 'view_passage': ghelp.nav_links(key='view_passage'),
+#                 'add_passage': ghelp.nav_links(key='add_passage'),
+#                 'words': ghelp.nav_links(key='words'),
+#                 'logout': ghelp.nav_links(key='logout')
+#             },
+#             'unauth': {
+#                 'home': ghelp.nav_links(key='home'),
+#                 'login': ghelp.nav_links(key='login'),
+#                 'register': ghelp.nav_links(key='register'),
+#             }
+#         },
+#         'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all().order_by('difficulty_level'), many=True).data,
+#         'passage': user_passage,
+#         'form': FORMS_PASS.CreatePassageNote(initial={
+#             'note': user_passage.note
+#         }),
+#         'words': word_serializers
+#     }
+#     if request.method == 'POST':
+#         if user_passage.user == request.user:
+#             form = FORMS_PASS.CreatePassageNote(request.POST)
+#             if form.is_valid():
+#                 user_passage.note=form.cleaned_data['note']
+#                 user_passage.save()
+#                 return redirect('get-single-passage', user_passage_id=user_passage_id)
+    
+#     if request.headers.get('X-Request-Type') == 'Word-Complexity-Level':
+#         # For AJAX requests, return JSON
+#         return JsonResponse({'html': render_to_string('dictionary/passage/passage_words.html', context, request=request)})
+#     elif request.headers.get('X-Request-Type') == 'Selected-Word-Meaning':
+#         meanings = []
+#         is_own_source = True
+#         word_text = request.GET.get('word')
+#         if word_text:
+#             word = MODELS_WORD.Word.objects.filter(text=word_text.strip().capitalize())
+#             if word.exists(): meanings = SR_MEAN.WordMeaningSerializer(word.first().meanings.all(), many=True).data
+#             else:
+#                 response = None
+#                 try: response = requests.get(f'https://lingva.ml/api/v1/en/bn/{word_text.strip().lower()}')
+#                 except: pass
+#                 if response != None:
+#                     if response.status_code:
+#                         meanings = [{'text': response.json()['translation']}]
+#                         is_own_source = False
+#                 else:
+#                     meanings = [{'text': 'দুঃখিত, আপাতত ইন্টারনেট সংযোগ নেই।'}]
+#                     is_own_source = False
+#         return JsonResponse({'meanings': meanings, 'is_own_source': is_own_source})
+#     return render(request, html_path, context=context)
+
+
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def get_single_passage(request, user_passage_id=None):
     html_path = 'dictionary/passage/single_passage.html'
     user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
-
-    filter_dict = ghelp.prepare_word_filter_dict(
-        request.user,
-        {'attribute': 'level', 'value': request.GET.get('complexity', '0')},
-        new={'attribute': 'created_at__gte', 'value': request.GET.get('keyword')},
-        search={'attribute': 'word__text__icontains', 'value': request.GET.get('search')},
-        extra={'word__word_passages__passage_id': user_passage.passage.id}
-    )
-    word_instances = request.user.user_words.filter(**filter_dict)
-    word_serializers = SR_WORD.UserWordSerializer(word_instances.distinct().order_by('-id'), many=True).data
     
     context = {
         'title': 'Single Passage',
@@ -171,6 +230,7 @@ def get_single_passage(request, user_passage_id=None):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
+                'settings': ghelp.nav_links(key='settings'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {
@@ -179,12 +239,11 @@ def get_single_passage(request, user_passage_id=None):
                 'register': ghelp.nav_links(key='register'),
             }
         },
-        'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data,
+        'levels': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all().order_by('difficulty_level'), many=True).data,
         'passage': user_passage,
         'form': FORMS_PASS.CreatePassageNote(initial={
             'note': user_passage.note
-        }),
-        'words': word_serializers
+        })
     }
     if request.method == 'POST':
         if user_passage.user == request.user:
@@ -195,8 +254,20 @@ def get_single_passage(request, user_passage_id=None):
                 return redirect('get-single-passage', user_passage_id=user_passage_id)
     
     if request.headers.get('X-Request-Type') == 'Word-Complexity-Level':
-        # For AJAX requests, return JSON
-        return JsonResponse({'html': render_to_string('dictionary/passage/passage_words.html', context, request=request)})
+        page_obj = Paginator(
+                passage_service.get_user_passage_words(request, user_passage),
+                int(request.GET.get('page_size', 10))
+            ).get_page(int(request.GET.get('page', 1)))
+        return JsonResponse({
+                'data': {
+                    'words': passage_service.serialized_user_passage_words(page_obj.object_list),
+                    'has_next': page_obj.has_next(),
+                    'has_previous': page_obj.has_previous(),
+                    'page_number': page_obj.number,
+                    'last_page': page_obj.paginator.num_pages
+                },
+                'levels': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all().order_by('difficulty_level'), many=True).data
+            }, status=200)
     elif request.headers.get('X-Request-Type') == 'Selected-Word-Meaning':
         meanings = []
         is_own_source = True

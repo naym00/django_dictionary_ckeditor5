@@ -20,7 +20,7 @@ def get_words(request):
         new={'attribute': 'created_at__gte', 'value': request.GET.get('keyword')},
         search={'attribute': 'word__text__icontains', 'value': request.GET.get('search')}
     )
-    serialized_levels = SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all(), many=True).data
+    serialized_levels = SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all().order_by('difficulty_level'), many=True).data
     context = {
         'title': 'Words',
         'user': request.user,
@@ -30,6 +30,7 @@ def get_words(request):
                 'view_passage': ghelp.nav_links(key='view_passage'),
                 'add_passage': ghelp.nav_links(key='add_passage'),
                 'words': ghelp.nav_links(key='words'),
+                'settings': ghelp.nav_links(key='settings'),
                 'logout': ghelp.nav_links(key='logout')
             },
             'unauth': {
@@ -124,7 +125,6 @@ def edit_word_complexity_level(request, id=None):
             MODELS_WORD.UserWord.objects.filter(id=id).update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
     return redirect('get-words')
 
-
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def add_word_from_passage(request, user_passage_id=None):
     if request.method == 'POST':
@@ -156,4 +156,4 @@ def add_word_from_passage(request, user_passage_id=None):
             passageword = word_instance.word_passages.filter(passage=user_passage.passage.id)
             if not passageword.exists():
                 MODELS_PASS.PassageWord.objects.create(word=word_instance, passage=MODELS_PASS.Passage.objects.get(id=user_passage.passage.id))
-    return redirect('get-passage-using-id', user_passage_id=user_passage_id)
+    return redirect('get-single-passage', user_passage_id=user_passage_id)

@@ -3,10 +3,10 @@ from django.contrib.auth.models import AbstractUser
 from help.choice import choice as CHOICE
 from help.common.generic import ghelp
 
-
 class User(AbstractUser):
     phone = models.CharField(max_length=100, null=True, blank=True)
-    gender = models.CharField(max_length=10, choices=ghelp.list_to_tuple(CHOICE.GENDER))
+    gender = models.CharField(max_length=10, choices=ghelp.list_to_tuple(CHOICE.GENDER), blank=True, null=True)
+    user_type = models.CharField(max_length=20, choices=ghelp.list_to_tuple(CHOICE.USER_TYPE), default='General')
     
     @property
     def full_name(self):
