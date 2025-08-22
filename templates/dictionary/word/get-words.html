@@ -68,13 +68,15 @@
                 {% endfor %}
             </div>
 
-            <div class="d-flex justify-content-center gap-2">
+            <div class="d-flex justify-content-center align-items-center gap-2">
                 <div class="d-flex align-items-center bg-primary rounded" style="height: 30px; width: 90px;">
                     <div class="form-check form-switch mx-auto">
                         <input class="form-check-input" type="checkbox" id="newWordsSwitch">
                         <label class="form-check-label" style="font-size: 12px;" for="newWordsSwitch">New</label>
                     </div>
                 </div>
+
+                <button id="hideMeaning" type="button" style="font-size: 12px; border: none; height: 20px; border-radius: 0 5px 5px 0;" onclick="hideMeaning()">Hide Meaning</button>
 
                 <div class="d-flex align-items-center bg-primary rounded" style="height: 30px; width: 150px;">
                     <div class="d-flex flex-row align-items-center mx-auto">
@@ -146,6 +148,14 @@
         function getChecked() {
             return document.getElementById('newWordsSwitch').checked ? 'new': ``;
         }
+        function meaningHideOrNot() {
+            const button = document.getElementById('hideMeaning');
+            return button.textContent == 'Hide Meaning' ? false : true;
+        }
+        function hideSingleMeaning(buttonId, meaningId) {
+            document.getElementById(buttonId).classList.add('d-none');
+            document.getElementById(meaningId).classList.replace('d-none', 'd-block');
+        }
         function getSearched() {
             return document.getElementById('searchInput').value;
         }
@@ -163,7 +173,7 @@
                     throw error;
                 });
         }
-        function renderWordCard(word, levelOptions = [], makeShort=true) {
+        function renderWordCard(word, levelOptions = [], makeShort=true, hideMeaning=false) {
             const wrapper = document.createElement('div');
             wrapper.className = "col-md-3 col-sm-6";
             wrapper.innerHTML = `
@@ -222,7 +232,10 @@
                         </div>
 
                         <!-- Meanings -->
-                        <div class="rounded-3">
+                        ${hideMeaning ? `
+                        <button id="hideSingleMeaning-${word.id}" type="button" style="font-size: 12px; border: none; height: 20px; background-color: transparent;" onclick="hideSingleMeaning('hideSingleMeaning-${word.id}', 'meaning-${word.id}')">Show Meaning</button>
+                        ` : ''}
+                        <div id="meaning-${word.id}" class="rounded-3 ${hideMeaning ? 'd-none' : 'd-block'}">
                             ${ makeShort ? `` : `<hr>` }
                             ${word.word.meanings.map(meaning => `
                                 <div class="d-flex justify-content-between">
@@ -407,7 +420,7 @@
                 }).join('')}
             `
         }
-        function fetchAndRenderWords(complexity, pageNumber, keyword='', search='', meaningSearch='', makeShort=true) {
+        function fetchAndRenderWords(complexity, pageNumber, keyword='', search='', meaningSearch='', makeShort=true, hideMeaning=false) {
             const wordsContainer = document.getElementById('words-container');
             // Show loading indicator
             wordsContainer.innerHTML = '<div class="position-absolute top-50 start-50"><div style="height: 100px; width: 100px;" class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
@@ -420,7 +433,7 @@
                         renderPagination(data.data.page_number, data.data.last_page);
                         wordsContainer.innerHTML = '';
                         const levelOptions = data.levels.filter(level => level.is_complexity_level) || [];
-                        data.data.words.forEach(word => wordsContainer.appendChild(renderWordCard(word, levelOptions, makeShort)));
+                        data.data.words.forEach(word => wordsContainer.appendChild(renderWordCard(word, levelOptions, makeShort, hideMeaning)));
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -430,7 +443,7 @@
                 .catch(error => console.error('Failed:', error));
         }
         document.addEventListener("DOMContentLoaded", function () {
-            fetchAndRenderWords('0', '1', '', '', '', true);
+            fetchAndRenderWords('0', '1', '', '', '', true, false);
         });
         function wordsComplexity(complexity) {
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -442,7 +455,8 @@
                 getChecked(),
                 getSearched(),
                 getMeaningSearch(),
-                makeShortStatus()
+                makeShortStatus(),
+                meaningHideOrNot()
             );
         }
         function viewDetails(){
@@ -454,7 +468,8 @@
                 getChecked(),
                 getSearched(),
                 getMeaningSearch(),
-                makeShortStatus()
+                makeShortStatus(),
+                meaningHideOrNot()
             );
         }    
         function wordsPagination(page_number){
@@ -464,7 +479,8 @@
                 getChecked(),
                 getSearched(),
                 getMeaningSearch(),
-                makeShortStatus()
+                makeShortStatus(),
+                meaningHideOrNot()
             );
         }
         function jumpToPageNo() {
@@ -475,8 +491,35 @@
                 getChecked(),
                 getSearched(),
                 getMeaningSearch(),
-                makeShortStatus()
+                makeShortStatus(),
+                meaningHideOrNot()
             );
+        }
+        function hideMeaning() {
+            const button = document.getElementById('hideMeaning');
+            if(button.textContent == 'Hide Meaning') {
+                fetchAndRenderWords(
+                    getComplexity(),
+                    getPageNumber(),
+                    getChecked(),
+                    getSearched(),
+                    getMeaningSearch(),
+                    makeShortStatus(),
+                    true
+                );
+                button.textContent = 'Show Meaning';
+            } else {
+                fetchAndRenderWords(
+                    getComplexity(),
+                    getPageNumber(),
+                    getChecked(),
+                    getSearched(),
+                    getMeaningSearch(),
+                    makeShortStatus(),
+                    false
+                );
+                button.textContent = 'Hide Meaning';
+            }
         }
         document.getElementById('newWordsSwitch').addEventListener('change', function() {
             fetchAndRenderWords(
@@ -485,7 +528,8 @@
                 this.checked ? 'new' : '',
                 getSearched(),
                 getMeaningSearch(),
-                makeShortStatus()
+                makeShortStatus(),
+                meaningHideOrNot()
             );
         });
         document.getElementById('searchInput').addEventListener('input', function() {
@@ -495,7 +539,8 @@
                 '',  // No checkbox-like status
                 this.value.trim(),  // Use typed text
                 getMeaningSearch(),
-                makeShortStatus()
+                makeShortStatus(),
+                meaningHideOrNot()
             ).catch(error => console.error('Fetch error:', error));
         });
         document.getElementById('searchMeaning').addEventListener('input', function() {
@@ -506,7 +551,8 @@
                 '',  // No checkbox-like status
                 getSearched(),
                 this.value.trim(),
-                makeShortStatus()
+                makeShortStatus(),
+                meaningHideOrNot()
             ).catch(error => console.error('Fetch error:', error));
         });
     </script>
