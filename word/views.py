@@ -16,7 +16,7 @@ def get_words(request):
     
     filter_dict = ghelp.prepare_word_filter_dict(
         request.user,
-        {'attribute': 'level', 'value': request.GET.get('complexity', '0')},
+        {'attribute': 'level__difficulty_level', 'value': request.GET.get('complexity', '0')},
         new={'attribute': 'created_at__gte', 'value': request.GET.get('keyword')},
         search={'attribute': 'word__text__icontains', 'value': request.GET.get('search')},
         meaning_search={'attribute': 'word__meanings__text__icontains', 'value': request.GET.get('meaning_search')}
@@ -40,6 +40,7 @@ def get_words(request):
                 'register': ghelp.nav_links(key='register'),
             }
         },
+        'user_settings': ghelp.get_user_settings(request.user),
         'levels': serialized_levels
     }
     if request.headers.get('X-Request-Type') == 'Words-Level':

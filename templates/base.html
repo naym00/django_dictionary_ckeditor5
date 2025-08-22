@@ -94,34 +94,21 @@
         </div>
 
         <script>
-            function editField(buttonId, buttonSubmitId, spanId, inputId) {
-                const button = document.getElementById(buttonId);
-                button.className = 'd-none';
-                const buttonSubmit = document.getElementById(buttonSubmitId)
-                buttonSubmit.className = 'd-flex';
-                const span = document.getElementById(spanId);
-                span.className = 'd-none';
-                const input = document.getElementById(inputId);
-                input.className = 'd-flex';
-            }
-        </script>
-
-        <script>
-            const currentPath = document.body.dataset.currentPath;
-            // /passage/add-passage/
-            // /passage/edit-passage/4/
-            const audienceSelect = document.getElementById('audience');
-            const audienceUsers = document.getElementById('audience_users');
-            function toggleCustomUsers() {
-                if (audienceSelect.value === 'Custom') {
-                    audienceUsers.className = 'd-flex rounded';
-                }
-                else {
-                    audienceUsers.className = 'd-none';
-                }
-            }
-            audienceSelect.addEventListener('change', toggleCustomUsers);
-            document.addEventListener('DOMContentLoaded', toggleCustomUsers);
+            // const currentPath = document.body.dataset.currentPath;
+            // // /passage/add-passage/
+            // // /passage/edit-passage/4/
+            // const audienceSelect = document.getElementById('audience');
+            // const audienceUsers = document.getElementById('audience_users');
+            // function toggleCustomUsers() {
+            //     if (audienceSelect.value === 'Custom') {
+            //         audienceUsers.className = 'd-flex rounded';
+            //     }
+            //     else {
+            //         audienceUsers.className = 'd-none';
+            //     }
+            // }
+            // audienceSelect.addEventListener('change', toggleCustomUsers);
+            // document.addEventListener('DOMContentLoaded', toggleCustomUsers);
         </script>
 
     </body>

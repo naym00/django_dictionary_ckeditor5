@@ -116,20 +116,11 @@
                 </div>
             </div>
 
-
-
-
-
-
-
-
-
             <div class="d-flex flex-column mt-3">
                 <div class="d-flex flex-column gap-2">
                     <div class="row">
-                        <button id="filter-btn0" class="filter-btn col-5 col-md-2 mx-auto active" data-complexity="0" onclick="wordsComplexity('0')">Mixed</button>
                         {% for level in levels %}
-                            <button id="filter-btn{{level.id}}" class="filter-btn col-5 col-md-2 mx-auto" data-complexity="{{level.id}}" onclick="wordsComplexity('{{level.id}}')">{{level.text}}</button>
+                            <button id="filter-btn{{level.difficulty_level}}" class="filter-btn col-5 col-md-2 mx-auto {% if user_settings.words_default_complexity_level.id == level.id %}active{% endif %}" data-complexity="{{level.difficulty_level}}" onclick="wordsComplexity('{{level.difficulty_level}}')">{{level.text}}</button>
                         {% endfor %}
                     </div>
 
@@ -173,6 +164,16 @@
 
 
     <script>
+        function editField(buttonId, buttonSubmitId, spanId, inputId) {
+            const button = document.getElementById(buttonId);
+            button.className = 'd-none';
+            const buttonSubmit = document.getElementById(buttonSubmitId)
+            buttonSubmit.className = 'd-flex';
+            const span = document.getElementById(spanId);
+            span.className = 'd-none';
+            const input = document.getElementById(inputId);
+            input.className = 'd-flex';
+        }
         function getComplexity() {
             let complexity = '0'
             document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -466,7 +467,7 @@
                         
                         renderPagination(data.data.page_number, data.data.last_page);
                         wordsContainer.innerHTML = '';
-                        const levelOptions = data.levels || [];
+                        const levelOptions = data.levels.filter(level => level.is_complexity_level) || [];
 
                         data.data.words.forEach(word => wordsContainer.appendChild(renderWordCard(word, levelOptions, makeShort)));
                     })

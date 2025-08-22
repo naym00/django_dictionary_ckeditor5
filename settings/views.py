@@ -52,41 +52,50 @@ def get_user_settings(request):
         complexity_difficulty_levels = request.POST.getlist('complexity_difficulty_level')
         for index, id in enumerate(complexity_ids):
             if id:
-                complexity = MODELS_WORD.ComplexityLevel.objects.get(id=id)
-                if complexity_texts[index]:
-                    if complexity.text.lower() != complexity_texts[index].lower():
-                        is_exist = MODELS_WORD.ComplexityLevel.objects.filter(text__iexact=complexity_texts[index].lower()).exists()
-                        if not is_exist: complexity.text=complexity_texts[index].capitalize()
-                if complexity_colors[index]:
-                    if complexity.color.lower() != complexity_colors[index].lower(): complexity.color=complexity_colors[index].lower()
-                if complexity_difficulty_levels[index]:
-                    difficulty_level = int(complexity_difficulty_levels[index])
-                    if complexity.difficulty_level != difficulty_level:
-                        is_exist = MODELS_WORD.ComplexityLevel.objects.filter(difficulty_level=difficulty_level).exists()
-                        if not is_exist: complexity.difficulty_level=difficulty_level
-                complexity.save()
-            else:
-                is_exist = MODELS_WORD.ComplexityLevel.objects.filter(text__iexact=complexity_texts[index].lower()).exists()
-                if not is_exist:
-                    difficulty_level = int(complexity_difficulty_levels[index])
-                    is_exist = MODELS_WORD.ComplexityLevel.objects.filter(difficulty_level=difficulty_level).exists()
+                complexity = MODELS_WORD.ComplexityLevel.objects.filter(id=id)
+                if complexity.exists():
+                    complexity = complexity.first()
+                    if complexity_texts[index]:
+                        if complexity.text.lower() != complexity_texts[index].lower():
+                            is_exist = MODELS_WORD.ComplexityLevel.objects.filter(text__iexact=complexity_texts[index].lower()).exists()
+                            if not is_exist: complexity.text=complexity_texts[index].capitalize()
+                    if complexity_colors[index]:
+                        if complexity.color.lower() != complexity_colors[index].lower(): complexity.color=complexity_colors[index].lower()
+                    if complexity_difficulty_levels[index]:
+                        difficulty_level = int(complexity_difficulty_levels[index])
+                        if complexity.difficulty_level != difficulty_level:
+                            is_exist = MODELS_WORD.ComplexityLevel.objects.filter(difficulty_level=difficulty_level).exists()
+                            if not is_exist: complexity.difficulty_level=difficulty_level
+                    if f'is_complexity_level{id}' in request.POST:
+                        if complexity.is_complexity_level != True: complexity.is_complexity_level=True
+                    else:
+                        if complexity.is_complexity_level != False: complexity.is_complexity_level=False
+                    complexity.save()
+                else:
+                    is_exist = MODELS_WORD.ComplexityLevel.objects.filter(text__iexact=complexity_texts[index].lower()).exists()
                     if not is_exist:
-                        if complexity_colors[index]:
-                            MODELS_WORD.ComplexityLevel.objects.create(
-                                text=complexity_texts[index].capitalize(),
-                                color=complexity_colors[index].lower(),
-                                difficulty_level=difficulty_level
-                            )
+                        difficulty_level = int(complexity_difficulty_levels[index])
+                        is_exist = MODELS_WORD.ComplexityLevel.objects.filter(difficulty_level=difficulty_level).exists()
+                        if not is_exist:
+                            if complexity_colors[index]:
+                                MODELS_WORD.ComplexityLevel.objects.create(
+                                    text=complexity_texts[index].capitalize(),
+                                    color=complexity_colors[index].lower(),
+                                    difficulty_level=difficulty_level,
+                                    is_complexity_level=True if f'is_complexity_level{id}' in request.POST else False
+                                )
         
         otp_validation_minutes = request.POST.get('otp_validation_minutes')
         new_word_day_duration = request.POST.get('new_word_day_duration')
         words_per_page = request.POST.get('words_per_page')
+        words_default_complexity_level = request.POST.get('words_default_complexity_level')
         
         if otp_validation_minutes: general_Settings.otp_validation_minutes = otp_validation_minutes
         general_Settings.save()
         
         if new_word_day_duration: user_settings.new_word_day_duration = new_word_day_duration
         if words_per_page: user_settings.words_per_page = words_per_page
+        if words_default_complexity_level: user_settings.words_default_complexity_level = MODELS_WORD.ComplexityLevel.objects.get(id=words_default_complexity_level)
         user_settings.save()
         return redirect('get-user-settings')
     return render(request, html_path, context=context)

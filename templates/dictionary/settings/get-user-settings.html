@@ -53,31 +53,34 @@
                 <!-- Complexity Levels Field -->
                 <div class="d-flex flex-column mb-4">
                     <label class="form-label">Complexity Levels</label>
-                    <div id="complexity-containter" class="row">
+                    <div id="complexity-containter" class="row gy-1">
                         {% for complexity in data.complexitys %}
                         <div id="complexity-{{complexity.id}}" class="col-12 my-1 complexities">
-                            <div class="d-flex flex-row bg-secondary rounded">
+                            <div class="row p-1 gy-1 rounded" style="background-color: #9c9595;">
                                 <input type="text"
-                                    style="width: 35%;"
-                                    class="form-control m-1"
+                                    class="transparent-input col-4 col-md-5"
                                     value="{{complexity.text}}"
                                     name="complexity_text"
                                     required>
                                 <input type="text"
-                                    style="width: 35%;"
-                                    class="form-control m-1"
+                                    class="transparent-input col-4 col-md-4"
                                     value="{{complexity.color}}"
                                     name="complexity_color"
                                     required>
                                 <input type="hidden" name="complexity_id" value="{{complexity.id}}">
                                 <input type="number"
-                                    style="width: 20%;"
-                                    class="form-control m-1"
+                                    class="transparent-input col-4 col-md-3"
                                     value="{{complexity.difficulty_level}}"
                                     name="complexity_difficulty_level"
                                     min="1"
                                     required>
-                                <button class="m-1" type="button" style="border: none; background-color: transparent;" onclick="removeComplexity('complexity-{{complexity.id}}')"><i class="bi bi-x-circle"></i></button>
+
+                                <div class="form-check col-4 col-md-10">
+                                    <input class="form-check-input" type="checkbox" {% if complexity.is_complexity_level %}checked{% endif %} name="is_complexity_level{{complexity.id}}" id="isComplexityLevel{{complexity.id}}">
+                                    <label class="form-check-label" for="isComplexityLevel{{complexity.id}}">Is this complexity level?</label>
+                                </div>
+
+                                <button class="col-6 col-md-2 rounded" type="button" style="border: none; background-color: #450f0f;" onclick="removeComplexity('complexity-{{complexity.id}}')"><i class="bi bi-x-circle"></i></button>
                             </div>
                         </div>
                         {% endfor %}
@@ -98,6 +101,17 @@
                            required>
                 </div>
                 {% endif %}
+
+                <!-- Words Default Complexity Level Field -->
+                <div class="mb-4">
+                    <label for="wordsDefaultComplexityLevel" class="form-label">Word's Default Complexity Level</label>
+                    <select id="wordsDefaultComplexityLevel" name="words_default_complexity_level" class="form-select">
+                        {% for complexity in data.complexitys %}
+                            <option value="{{ complexity.id }}" {% if data.user_settings.words_default_complexity_level.id == complexity.id %}selected{% endif %}>{{ complexity.text }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 
                 <!-- New Word Day Duration Field -->
                 <div class="mb-4">
@@ -153,26 +167,30 @@
             child.className = "col-12 my-1 complexities";
             child.id = `complexity-${complexityNewId}`;
             child.innerHTML = `
-                <div class="d-flex flex-row bg-secondary rounded">
+
+                <div class="row p-1 gy-1 rounded" style="background-color: #9c9595;">
                     <input type="text"
-                        style="width: 35%;"
-                        class="form-control m-1"
+                        class="transparent-input col-4 col-md-5"
                         name="complexity_text"
                         required>
                     <input type="text"
-                        style="width: 35%;"
-                        class="form-control m-1"
+                        class="transparent-input col-4 col-md-4"
                         name="complexity_color"
                         required>
-                    <input type="hidden" name="complexity_id" value="{{complexity.id}}">
+                    <input type="hidden" name="complexity_id" value=${complexityNewId}>
                     <input type="number"
-                        style="width: 20%;"
-                        class="form-control m-1"
+                        class="transparent-input col-4 col-md-3"
                         value=${complexityNewId}
                         name="complexity_difficulty_level"
-                        min=${complexityNewId}
+                        min="0"
                         required>
-                    <button class="m-1" type="button" style="border: none; background-color: transparent;" onclick="removeComplexity('complexity-{{complexity.id}}')"><i class="bi bi-x-circle"></i></button>
+
+                    <div class="form-check col-4 col-md-10">
+                        <input class="form-check-input" type="checkbox" name="is_complexity_level${complexityNewId}" id="isComplexityLevel${complexityNewId}">
+                        <label class="form-check-label" for="isComplexityLevel${complexityNewId}">Is this complexity level?</label>
+                    </div>
+
+                    <button class="col-6 col-md-2 rounded" type="button" style="border: none; background-color: #450f0f;" onclick="removeComplexity('complexity-${complexityNewId}')"><i class="bi bi-x-circle"></i></button>
                 </div>
             `
             document.getElementById('complexity-containter').appendChild(child)

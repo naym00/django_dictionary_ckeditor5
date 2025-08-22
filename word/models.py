@@ -5,6 +5,7 @@ class ComplexityLevel(models.Model):
     text = models.CharField(max_length=50, unique=True)
     difficulty_level = models.IntegerField(default=1)
     color = models.CharField(max_length=50)
+    is_complexity_level = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f'{self.id} - {self.difficulty_level} - {self.text}'

@@ -63,9 +63,8 @@
     <div class="d-flex flex-column mt-3">
         <div class="d-flex flex-column gap-2">
             <div class="row">
-                <button class="filter-btn col-5 col-md-2 mx-auto active" data-complexity="0">Mixed</button>
                 {% for level in levels %}
-                    <button class="filter-btn col-5 col-md-2 mx-auto" data-complexity="{{level.id}}">{{level.text}}</button>
+                    <button id="filter-btn{{level.difficulty_level}}" class="filter-btn col-5 col-md-2 mx-auto {% if user_settings.words_default_complexity_level.id == level.id %}active{% endif %}" data-complexity="{{level.difficulty_level}}" onclick="wordsComplexity('{{level.difficulty_level}}')">{{level.text}}</button>
                 {% endfor %}
             </div>
 
@@ -104,6 +103,16 @@
     </div>
 
     <script>
+        function editField(buttonId, buttonSubmitId, spanId, inputId) {
+            const button = document.getElementById(buttonId);
+            button.className = 'd-none';
+            const buttonSubmit = document.getElementById(buttonSubmitId)
+            buttonSubmit.className = 'd-flex';
+            const span = document.getElementById(spanId);
+            span.className = 'd-none';
+            const input = document.getElementById(inputId);
+            input.className = 'd-flex';
+        }
         function hideAddWord(){
             const button = document.getElementById('hide-add-word');
             const addWordDiv = document.getElementById('add-word-div');
@@ -410,7 +419,7 @@
                     .then(data => {
                         renderPagination(data.data.page_number, data.data.last_page);
                         wordsContainer.innerHTML = '';
-                        const levelOptions = data.levels || [];
+                        const levelOptions = data.levels.filter(level => level.is_complexity_level) || [];
                         data.data.words.forEach(word => wordsContainer.appendChild(renderWordCard(word, levelOptions, makeShort)));
                     })
                     .catch(error => {
@@ -423,24 +432,19 @@
         document.addEventListener("DOMContentLoaded", function () {
             fetchAndRenderWords('0', '1', '', '', '', true);
         });
-        // Words based on complexity(All, Easy, Medium, Hard, New)
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Update active button
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                
-                fetchAndRenderWords(
-                    button.dataset.complexity,
-                    '1',
-                    getChecked(),
-                    getSearched(),
-                    getMeaningSearch(),
-                    makeShortStatus()
-                );
-            });
-        });
+        function wordsComplexity(complexity) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`filter-btn${complexity}`).classList.add('active');
+            console.log(complexity)
+            fetchAndRenderWords(
+                complexity,
+                '1',
+                getChecked(),
+                getSearched(),
+                getMeaningSearch(),
+                makeShortStatus()
+            );
+        }
         function viewDetails(){
             button = document.getElementById('view-details')
             button.textContent = button.textContent == 'View Details' ? 'Hide Details' : 'View Details';

@@ -6,8 +6,8 @@ class J(K):
         if new:
             if new['value'] == 'new': self.update_new_word_filter_dict(new['attribute'], loggedin_user, filter_dict)
         if search:
-            if search['value']: filter_dict.update({search['attribute']: search['value']})
+            if search['value']: filter_dict.update({search['attribute']: search['value'].strip()})
         if meaning_search:
-            if meaning_search['value']: filter_dict.update({meaning_search['attribute']: meaning_search['value']})
+            if meaning_search['value']: filter_dict.update({meaning_search['attribute']: meaning_search['value'].strip()})
         filter_dict.update(extra)
         return filter_dict
