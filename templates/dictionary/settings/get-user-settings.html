@@ -138,6 +138,18 @@
                            required>
                 </div>
 
+                <!-- Blind Test Score To Change Complexity Level Field -->
+                <div class="mb-4">
+                    <label for="blindTestScoreToChangeComplexityLevel" class="form-label">Blind Test Score To Change Complexity Level</label>
+                    <input type="number" 
+                           class="form-control"
+                           id="blindTestScoreToChangeComplexityLevel"
+                           name="blind_test_score_to_change_complexity_level"
+                           value="{{ data.user_settings.blind_test_score_to_change_complexity_level|default:'' }}"
+                           min="1"
+                           required>
+                </div>
+
                 <!-- Submit Button -->
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                     <button type="submit" class="btn btn-primary">

@@ -21,5 +21,6 @@ class UserSettings(models.Model):
     new_word_day_duration = models.IntegerField(default=7)
     words_per_page = models.IntegerField(default=12)
     words_default_complexity_level = models.ForeignKey(MODELS_WORD.ComplexityLevel, on_delete=models.SET_NULL, blank=True, null=True)
+    blind_test_score_to_change_complexity_level = models.IntegerField(default=20)
     def __str__(self):
         return f'{self.id} - {self.user.username}'

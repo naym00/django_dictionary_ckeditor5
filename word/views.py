@@ -130,10 +130,20 @@ def edit_word_complexity_level(request, id=None):
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def increment_blind_test_score(request, id=None):
+    is_complexity_level_changed = False
     user_word = MODELS_WORD.UserWord.objects.get(id=id)
-    user_word.blind_test_score=user_word.blind_test_score+1
+    blind_test_score = user_word.blind_test_score+1
+    
+    level = MODELS_WORD.ComplexityLevel.objects.filter(is_complexity_level=True, difficulty_level__lt=user_word.level.difficulty_level).last()
+    if level:
+        user_settings = ghelp.get_user_settings(request.user)
+        if blind_test_score >= user_settings.blind_test_score_to_change_complexity_level:
+            user_word.level=level
+            blind_test_score = 0
+            is_complexity_level_changed = True
+    user_word.blind_test_score=blind_test_score
     user_word.save()
-    return JsonResponse({'message': 'incremented'}, status=status.HTTP_200_OK)
+    return JsonResponse({'success': True, 'is_complexity_level_changed': is_complexity_level_changed}, status=status.HTTP_200_OK)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def add_word_from_passage(request, user_passage_id=None):

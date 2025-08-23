@@ -89,13 +89,43 @@ def get_user_settings(request):
         new_word_day_duration = request.POST.get('new_word_day_duration')
         words_per_page = request.POST.get('words_per_page')
         words_default_complexity_level = request.POST.get('words_default_complexity_level')
+        blind_test_score_to_change_complexity_level = request.POST.get('blind_test_score_to_change_complexity_level')
         
         if otp_validation_minutes: general_Settings.otp_validation_minutes = otp_validation_minutes
         general_Settings.save()
-        
-        if new_word_day_duration: user_settings.new_word_day_duration = new_word_day_duration
-        if words_per_page: user_settings.words_per_page = words_per_page
-        if words_default_complexity_level: user_settings.words_default_complexity_level = MODELS_WORD.ComplexityLevel.objects.get(id=words_default_complexity_level)
+                
+        if new_word_day_duration:
+            new_word_day_duration = int(new_word_day_duration)
+            if user_settings.new_word_day_duration != new_word_day_duration:
+                user_settings.new_word_day_duration = new_word_day_duration
+                
+        if words_per_page:
+            words_per_page = int(words_per_page)
+            if user_settings.words_per_page != words_per_page:
+                user_settings.words_per_page = words_per_page
+                
+        if words_default_complexity_level:
+            words_default_complexity_level = int(words_default_complexity_level)
+            if user_settings.words_default_complexity_level:
+                if user_settings.words_default_complexity_level.id != words_default_complexity_level:
+                    user_settings.words_default_complexity_level = MODELS_WORD.ComplexityLevel.objects.get(id=words_default_complexity_level)
+            else:
+                user_settings.words_default_complexity_level = MODELS_WORD.ComplexityLevel.objects.get(id=words_default_complexity_level)
+                
+        if blind_test_score_to_change_complexity_level:
+            blind_test_score_to_change_complexity_level = int(blind_test_score_to_change_complexity_level)
+            if user_settings.blind_test_score_to_change_complexity_level != blind_test_score_to_change_complexity_level:
+                user_settings.blind_test_score_to_change_complexity_level = blind_test_score_to_change_complexity_level
+                
+                user_words = request.user.user_words.filter(blind_test_score__gte=blind_test_score_to_change_complexity_level)
+                for user_word in user_words:
+                    level = MODELS_WORD.ComplexityLevel.objects.filter(is_complexity_level=True, difficulty_level__lt=user_word.level.difficulty_level).last()
+                    if level:
+                        if user_word.blind_test_score >= blind_test_score_to_change_complexity_level:
+                            user_word.level=level
+                            user_word.blind_test_score=0
+                            user_word.save()
+                
         user_settings.save()
         return redirect('get-user-settings')
     return render(request, html_path, context=context)
