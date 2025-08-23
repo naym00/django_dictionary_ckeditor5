@@ -125,7 +125,7 @@ def edit_word_complexity_level(request, id=None):
     if request.method == 'POST':
         difficult_level = request.POST.get('difficult_level')
         if difficult_level:
-            MODELS_WORD.UserWord.objects.filter(id=id).update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
+            MODELS_WORD.UserWord.objects.filter(id=id).update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level), blind_test_score=0)
     return redirect('get-words')
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
