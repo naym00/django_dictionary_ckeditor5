@@ -8,6 +8,7 @@ from passage import models as MODELS_PASS
 from word import models as MODELS_WORD
 from help.common.generic import ghelp
 from django.http import JsonResponse
+from rest_framework import status
 
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
@@ -57,7 +58,7 @@ def get_words(request):
                     'last_page': page_obj.paginator.num_pages
                 },
                 'levels': serialized_levels
-            }, status=200)
+            }, status=status.HTTP_200_OK)
     return render(request, html_path, context=context)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
@@ -126,6 +127,13 @@ def edit_word_complexity_level(request, id=None):
         if difficult_level:
             MODELS_WORD.UserWord.objects.filter(id=id).update(level=MODELS_WORD.ComplexityLevel.objects.get(id=difficult_level))
     return redirect('get-words')
+
+@login_required(login_url=ghelp.nav_links(key='login')['link'])
+def increment_blind_test_score(request, id=None):
+    user_word = MODELS_WORD.UserWord.objects.get(id=id)
+    user_word.blind_test_score=user_word.blind_test_score+1
+    user_word.save()
+    return JsonResponse({'message': 'incremented'}, status=status.HTTP_200_OK)
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def add_word_from_passage(request, user_passage_id=None):

@@ -48,7 +48,9 @@
                     <input class="rounded col-12 col-md-8" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="example" placeholder="Example">
                     <select class="rounded col-6 col-md-2" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" name="difficult_level">
                         {% for level in levels %}
+                            {% if level.is_complexity_level %}
                             <option value="{{ level.id }}">{{ level.text }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                     <button type="submit" style="height: 25px; padding: 0;" class="btn btn-sm rounded btn-primary col-6 col-md-2">Submit</button>
@@ -106,14 +108,10 @@
 
     <script>
         function editField(buttonId, buttonSubmitId, spanId, inputId) {
-            const button = document.getElementById(buttonId);
-            button.className = 'd-none';
-            const buttonSubmit = document.getElementById(buttonSubmitId)
-            buttonSubmit.className = 'd-flex';
-            const span = document.getElementById(spanId);
-            span.className = 'd-none';
-            const input = document.getElementById(inputId);
-            input.className = 'd-flex';
+            const button = document.getElementById(buttonId).className = 'd-none';
+            const buttonSubmit = document.getElementById(buttonSubmitId).className = 'd-flex';
+            const span = document.getElementById(spanId).className = 'd-none';
+            const input = document.getElementById(inputId).className = 'd-flex';
         }
         function hideAddWord(){
             const button = document.getElementById('hide-add-word');
@@ -192,6 +190,9 @@
                                     <div class="btn-group-visibility d-flex align-items-center">
                                         <button id="buttonWordText${word.id}" type="button" onclick="editField('buttonWordText${word.id}', 'buttonSubmitWordText${word.id}', 'spanWordText${word.id}', 'inputWordText${word.id}')" style="border: none; background-color: transparent;"><i class="bi bi-pencil"></i></button>
                                     </div>
+                                    <div class="btn-group-visibility d-flex align-items-center">
+                                        <button id="incrementBlindTestScore-${word.id}" type="button" style="border: none; background-color: transparent;" onclick="incrementBlindTestScore(${word.id})">${word.blind_test_score}</button>
+                                    </div>
                                 </form>
 
                                 <!-- Pronunciation form -->
@@ -233,8 +234,8 @@
 
                         <!-- Meanings -->
                         ${hideMeaning ? `
-                        <button id="hideSingleMeaning-${word.id}" type="button" style="font-size: 12px; border: none; height: 20px; background-color: transparent;" onclick="hideSingleMeaning('hideSingleMeaning-${word.id}', 'meaning-${word.id}')">Show Meaning</button>
-                        ` : ''}
+                            <button id="hideSingleMeaning-${word.id}" type="button" style="font-size: 12px; border: none; height: 20px; background-color: transparent;" onclick="hideSingleMeaning('hideSingleMeaning-${word.id}', 'meaning-${word.id}')"><i class="bi bi-eye"></i></button>
+                            ` : ''}
                         <div id="meaning-${word.id}" class="rounded-3 ${hideMeaning ? 'd-none' : 'd-block'}">
                             ${ makeShort ? `` : `<hr>` }
                             ${word.word.meanings.map(meaning => `
@@ -520,6 +521,17 @@
                 );
                 button.textContent = 'Hide Meaning';
             }
+        }
+        function incrementBlindTestScore(wordId) {
+            const button = document.getElementById(`incrementBlindTestScore-${wordId}`);
+            button.textContent = parseInt(button.textContent) + 1;
+            fetch(`http://127.0.0.1:8000/word/increment-blind-test-score/${wordId}/`)
+            .then(resp => resp.json())
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+
         }
         document.getElementById('newWordsSwitch').addEventListener('change', function() {
             fetchAndRenderWords(

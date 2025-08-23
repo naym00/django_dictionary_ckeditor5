@@ -83,7 +83,9 @@
                                 <input class="rounded" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="meanings" placeholder="Meaning" required>
                                 <select class="rounded" style="height: 25px; border: 1px solid #a3ada6;" name="difficult_level">
                                     {% for level in levels %}
+                                        {% if level.is_complexity_level %}
                                         <option value="{{ level.id }}">{{ level.text }}</option>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                                 <button type="submit" class="btn btn-sm"><i class="bi bi-check-circle"></i></button>

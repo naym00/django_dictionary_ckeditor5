@@ -23,6 +23,7 @@ class UserWord(models.Model):
     user = models.ForeignKey(MODELS_USER.User, on_delete=models.CASCADE, related_name='user_words')
     word = models.ForeignKey(Word, on_delete=models.CASCADE, related_name='word_users')
     level = models.ForeignKey(ComplexityLevel, on_delete=models.SET_NULL, blank=True, null=True, related_name='level_words')
+    blind_test_score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
