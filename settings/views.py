@@ -89,7 +89,8 @@ def get_user_settings(request):
         new_word_day_duration = request.POST.get('new_word_day_duration')
         words_per_page = request.POST.get('words_per_page')
         words_default_complexity_level = request.POST.get('words_default_complexity_level')
-        blind_test_score_to_change_complexity_level = request.POST.get('blind_test_score_to_change_complexity_level')
+        right_prediction_to_change_complexity_level = request.POST.get('right_prediction_to_change_complexity_level')
+        # wrong_prediction_to_change_complexity_level = request.POST.get('wrong_prediction_to_change_complexity_level')
         
         if otp_validation_minutes: general_Settings.otp_validation_minutes = otp_validation_minutes
         general_Settings.save()
@@ -112,16 +113,16 @@ def get_user_settings(request):
             else:
                 user_settings.words_default_complexity_level = MODELS_WORD.ComplexityLevel.objects.get(id=words_default_complexity_level)
                 
-        if blind_test_score_to_change_complexity_level:
-            blind_test_score_to_change_complexity_level = int(blind_test_score_to_change_complexity_level)
-            if user_settings.blind_test_score_to_change_complexity_level != blind_test_score_to_change_complexity_level:
-                user_settings.blind_test_score_to_change_complexity_level = blind_test_score_to_change_complexity_level
+        if right_prediction_to_change_complexity_level:
+            right_prediction_to_change_complexity_level = int(right_prediction_to_change_complexity_level)
+            if user_settings.right_prediction_to_change_complexity_level != right_prediction_to_change_complexity_level:
+                user_settings.right_prediction_to_change_complexity_level = right_prediction_to_change_complexity_level
                 
-                user_words = request.user.user_words.filter(blind_test_score__gte=blind_test_score_to_change_complexity_level)
+                user_words = request.user.user_words.filter(blind_test_score__gte=right_prediction_to_change_complexity_level)
                 for user_word in user_words:
                     level = MODELS_WORD.ComplexityLevel.objects.filter(is_complexity_level=True, difficulty_level__lt=user_word.level.difficulty_level).last()
                     if level:
-                        if user_word.blind_test_score >= blind_test_score_to_change_complexity_level:
+                        if user_word.blind_test_score >= right_prediction_to_change_complexity_level:
                             user_word.level=level
                             user_word.blind_test_score=0
                             user_word.save()

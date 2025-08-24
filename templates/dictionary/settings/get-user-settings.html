@@ -138,14 +138,26 @@
                            required>
                 </div>
 
-                <!-- Blind Test Score To Change Complexity Level Field -->
+                <!-- Right Prediction To Change Complexity Level Field -->
                 <div class="mb-4">
-                    <label for="blindTestScoreToChangeComplexityLevel" class="form-label">Blind Test Score To Change Complexity Level</label>
+                    <label for="rightPredictionToChangeComplexityLevel" class="form-label">Right Prediction To Change Complexity Level</label>
                     <input type="number" 
                            class="form-control"
-                           id="blindTestScoreToChangeComplexityLevel"
-                           name="blind_test_score_to_change_complexity_level"
-                           value="{{ data.user_settings.blind_test_score_to_change_complexity_level|default:'' }}"
+                           id="rightPredictionToChangeComplexityLevel"
+                           name="right_prediction_to_change_complexity_level"
+                           value="{{ data.user_settings.right_prediction_to_change_complexity_level|default:'' }}"
+                           min="1"
+                           required>
+                </div>
+
+                <!-- Wrong Prediction To Change Complexity Level Field -->
+                <div class="mb-4">
+                    <label for="wrongPredictionToChangeComplexityLevel" class="form-label">Wrong Prediction To Change Complexity Level</label>
+                    <input type="number" 
+                           class="form-control"
+                           id="wrongPredictionToChangeComplexityLevel"
+                           name="wrong_prediction_to_change_complexity_level"
+                           value="{{ data.user_settings.wrong_prediction_to_change_complexity_level|default:'' }}"
                            min="1"
                            required>
                 </div>

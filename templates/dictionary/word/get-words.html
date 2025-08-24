@@ -192,7 +192,7 @@
                                         <button id="buttonWordText${word.id}" type="button" onclick="editField('buttonWordText${word.id}', 'buttonSubmitWordText${word.id}', 'spanWordText${word.id}', 'inputWordText${word.id}')" style="border: none; background-color: transparent;"><i class="bi bi-pencil"></i></button>
                                     </div>
                                     <div class="btn-group-visibility d-flex align-items-center">
-                                        <button id="incrementBlindTestScore-${word.id}" type="button" style="border: none; background-color: transparent;" onclick="incrementBlindTestScore(${word.id})">${word.blind_test_score}</button>
+                                        <button id="incrementRightPrediction-${word.id}" type="button" style="border: none; background-color: transparent;" onclick="incrementRightPrediction(${word.id})">+${word.right_prediction}</button>
                                     </div>
                                 </form>
 
@@ -522,10 +522,10 @@
                 button.textContent = 'Hide Meaning';
             }
         }
-        function incrementBlindTestScore(wordId) {
-            const button = document.getElementById(`incrementBlindTestScore-${wordId}`);
-            button.textContent = parseInt(button.textContent) + 1;
-            fetch(`http://127.0.0.1:8000/word/increment-blind-test-score/${wordId}/`)
+        function incrementRightPrediction(wordId) {
+            const button = document.getElementById(`incrementRightPrediction-${wordId}`);
+            button.textContent = `+${parseInt(button.textContent) + 1}`;
+            fetch(`http://127.0.0.1:8000/word/increment-right-prediction/${wordId}/`)
             .then(resp => resp.json())
             .then(data => {
                 if(data.is_complexity_level_changed) {
