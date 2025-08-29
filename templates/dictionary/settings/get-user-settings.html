@@ -62,11 +62,14 @@
                                     value="{{complexity.text}}"
                                     name="complexity_text"
                                     required>
-                                <input type="text"
+
+                                <input type="color"
                                     class="transparent-input col-4 col-md-4"
                                     value="{{complexity.color}}"
                                     name="complexity_color"
-                                    required>
+                                    required
+                                    >
+                                    
                                 <input type="hidden" name="complexity_id" value="{{complexity.id}}">
                                 <input type="number"
                                     class="transparent-input col-4 col-md-3"
@@ -197,10 +200,11 @@
                         class="transparent-input col-4 col-md-5"
                         name="complexity_text"
                         required>
-                    <input type="text"
+                    <input type="color"
                         class="transparent-input col-4 col-md-4"
                         name="complexity_color"
-                        required>
+                        required
+                        >
                     <input type="hidden" name="complexity_id" value=${complexityNewId}>
                     <input type="number"
                         class="transparent-input col-4 col-md-3"

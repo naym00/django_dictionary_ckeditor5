@@ -55,13 +55,13 @@ def get_user_settings(request):
                 complexity = MODELS_WORD.ComplexityLevel.objects.filter(id=id)
                 if complexity.exists():
                     complexity = complexity.first()
-                    if complexity_texts[index]:
+                    if complexity_texts[index] and complexity.text:
                         if complexity.text.lower() != complexity_texts[index].lower():
                             is_exist = MODELS_WORD.ComplexityLevel.objects.filter(text__iexact=complexity_texts[index].lower()).exists()
                             if not is_exist: complexity.text=complexity_texts[index].capitalize()
-                    if complexity_colors[index]:
+                    if complexity_colors[index] and complexity.color:
                         if complexity.color.lower() != complexity_colors[index].lower(): complexity.color=complexity_colors[index].lower()
-                    if complexity_difficulty_levels[index]:
+                    if complexity_difficulty_levels[index] and complexity.difficulty_level:
                         difficulty_level = int(complexity_difficulty_levels[index])
                         if complexity.difficulty_level != difficulty_level:
                             is_exist = MODELS_WORD.ComplexityLevel.objects.filter(difficulty_level=difficulty_level).exists()
@@ -90,7 +90,7 @@ def get_user_settings(request):
         words_per_page = request.POST.get('words_per_page')
         words_default_complexity_level = request.POST.get('words_default_complexity_level')
         right_prediction_to_change_complexity_level = request.POST.get('right_prediction_to_change_complexity_level')
-        # wrong_prediction_to_change_complexity_level = request.POST.get('wrong_prediction_to_change_complexity_level')
+        wrong_prediction_to_change_complexity_level = request.POST.get('wrong_prediction_to_change_complexity_level')
         
         if otp_validation_minutes: general_Settings.otp_validation_minutes = otp_validation_minutes
         general_Settings.save()
@@ -118,13 +118,27 @@ def get_user_settings(request):
             if user_settings.right_prediction_to_change_complexity_level != right_prediction_to_change_complexity_level:
                 user_settings.right_prediction_to_change_complexity_level = right_prediction_to_change_complexity_level
                 
-                user_words = request.user.user_words.filter(blind_test_score__gte=right_prediction_to_change_complexity_level)
+                user_words = request.user.user_words.filter(right_prediction__gte=right_prediction_to_change_complexity_level)
                 for user_word in user_words:
-                    level = MODELS_WORD.ComplexityLevel.objects.filter(is_complexity_level=True, difficulty_level__lt=user_word.level.difficulty_level).last()
+                    level = MODELS_WORD.ComplexityLevel.objects.filter(is_complexity_level=True, difficulty_level__lt=user_word.level.difficulty_level).order_by('difficulty_level').last()
                     if level:
-                        if user_word.blind_test_score >= right_prediction_to_change_complexity_level:
+                        if user_word.right_prediction >= right_prediction_to_change_complexity_level:
                             user_word.level=level
-                            user_word.blind_test_score=0
+                            user_word.right_prediction=0
+                            user_word.save()
+                            
+        if wrong_prediction_to_change_complexity_level:
+            wrong_prediction_to_change_complexity_level = int(wrong_prediction_to_change_complexity_level)
+            if user_settings.wrong_prediction_to_change_complexity_level != wrong_prediction_to_change_complexity_level:
+                user_settings.wrong_prediction_to_change_complexity_level = wrong_prediction_to_change_complexity_level
+                
+                user_words = request.user.user_words.filter(wrong_prediction__gte=wrong_prediction_to_change_complexity_level)
+                for user_word in user_words:
+                    level = MODELS_WORD.ComplexityLevel.objects.filter(is_complexity_level=True, difficulty_level__gt=user_word.level.difficulty_level).order_by('difficulty_level').first()
+                    if level:
+                        if user_word.wrong_prediction >= wrong_prediction_to_change_complexity_level:
+                            user_word.level=level
+                            user_word.wrong_prediction=0
                             user_word.save()
                 
         user_settings.save()

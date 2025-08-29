@@ -3,6 +3,7 @@ from user import models as MODELS_USER
 
 class ComplexityLevel(models.Model):
     text = models.CharField(max_length=50, unique=True)
+    # short_form = models.CharField(max_length=50, unique=True)
     difficulty_level = models.IntegerField(default=1)
     color = models.CharField(max_length=50)
     is_complexity_level = models.BooleanField(default=False)

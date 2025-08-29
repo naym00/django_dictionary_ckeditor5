@@ -77,7 +77,7 @@
 
                     <div class="hide-to-short bg-secondary d-flex justify-content-center align-items-center rounded make-transparent m-auto" style="position: sticky; top: 85px;">
                         <div class="d-flex justify-content-center align-items-center w-50 m-1">
-                            <form method="POST" action="{% url 'add-word-from-passage' passage.id %}" class="form-inline d-flex justify-content-between align-items-center gap-1">
+                            {% comment %} <form method="POST" action="{% url 'add-word-from-passage' passage.id %}" class="form-inline d-flex justify-content-between align-items-center gap-1">
                                 {% csrf_token %}
                                 <input class="rounded" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
                                 <input class="rounded" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="meanings" placeholder="Meaning" required>
@@ -89,7 +89,19 @@
                                     {% endfor %}
                                 </select>
                                 <button type="submit" class="btn btn-sm"><i class="bi bi-check-circle"></i></button>
-                            </form>
+                            </form> {% endcomment %}
+                            <div class="d-flex justify-content-between align-items-center gap-1">
+                                <input id="text" class="rounded" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" placeholder="New Word" required>
+                                <input id="meanings" class="rounded" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" placeholder="Meaning" required>
+                                <select id="difficult_level" class="rounded" style="height: 25px; border: 1px solid #a3ada6;">
+                                    {% for level in levels %}
+                                        {% if level.is_complexity_level %}
+                                        <option value="{{ level.id }}">{{ level.text }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-sm" onclick="addWord()"><i class="bi bi-check-circle"></i></button>
+                            </div>
                         </div>
                     </div>
                     
@@ -577,6 +589,31 @@
             divsToHide.forEach(div => {
                 div.classList.toggle('d-none', shouldHide);
             });
+        }
+        function addWord() {
+            const passageId = window.location.pathname.split('/')[3];
+            const text = document.getElementById('text');
+            const meanings = document.getElementById('meanings');
+            const difficult_level = document.getElementById('difficult_level');
+
+            fetch(`/word/add-word-from-passage/${passageId}/?text=${text.value}&meanings=${meanings.value}&difficult_level=${difficult_level.value}`)
+            .then(resp => resp.json())
+            .then(data => {
+                text.value = '';
+                meanings.value = '';
+                difficult_level.value = '1';
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+            fetchAndRenderWords(
+                getComplexity(),
+                getPageNumber(),
+                getChecked(),
+                getSearched(),
+                makeShortStatus()
+            );
         }
         function editField(buttonId, buttonSubmitId, spanId, inputId) {
             const button = document.getElementById(buttonId);

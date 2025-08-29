@@ -42,7 +42,6 @@ def get_passages(request):
     }
     return render(request, html_path, context=context)
 
-
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def add_passage(request):
     html_path = 'dictionary/passage/add_passage.html'
@@ -150,71 +149,6 @@ def reset_passage(request, user_passage_id=None):
         user_passage.content=user_passage.passage.content
         user_passage.save()
     return redirect('get-single-passage', user_passage_id=user_passage_id)
-
-# @login_required(login_url=ghelp.nav_links(key='login')['link'])
-# def get_single_passage(request, user_passage_id=None):
-#     html_path = 'dictionary/passage/single_passage.html'
-#     user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
-    
-#     word_instances = passage_service.get_user_passage_words(request, user_passage)
-#     word_serializers = passage_service.serialized_user_passage_words(word_instances)
-    
-#     context = {
-#         'title': 'Single Passage',
-#         'user': request.user,
-#         'nav_links': {
-#             'auth': {
-#                 'home': ghelp.nav_links(key='home', user=request.user),
-#                 'view_passage': ghelp.nav_links(key='view_passage'),
-#                 'add_passage': ghelp.nav_links(key='add_passage'),
-#                 'words': ghelp.nav_links(key='words'),
-#                 'logout': ghelp.nav_links(key='logout')
-#             },
-#             'unauth': {
-#                 'home': ghelp.nav_links(key='home'),
-#                 'login': ghelp.nav_links(key='login'),
-#                 'register': ghelp.nav_links(key='register'),
-#             }
-#         },
-#         'level': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all().order_by('difficulty_level'), many=True).data,
-#         'passage': user_passage,
-#         'form': FORMS_PASS.CreatePassageNote(initial={
-#             'note': user_passage.note
-#         }),
-#         'words': word_serializers
-#     }
-#     if request.method == 'POST':
-#         if user_passage.user == request.user:
-#             form = FORMS_PASS.CreatePassageNote(request.POST)
-#             if form.is_valid():
-#                 user_passage.note=form.cleaned_data['note']
-#                 user_passage.save()
-#                 return redirect('get-single-passage', user_passage_id=user_passage_id)
-    
-#     if request.headers.get('X-Request-Type') == 'Word-Complexity-Level':
-#         # For AJAX requests, return JSON
-#         return JsonResponse({'html': render_to_string('dictionary/passage/passage_words.html', context, request=request)})
-#     elif request.headers.get('X-Request-Type') == 'Selected-Word-Meaning':
-#         meanings = []
-#         is_own_source = True
-#         word_text = request.GET.get('word')
-#         if word_text:
-#             word = MODELS_WORD.Word.objects.filter(text=word_text.strip().capitalize())
-#             if word.exists(): meanings = SR_MEAN.WordMeaningSerializer(word.first().meanings.all(), many=True).data
-#             else:
-#                 response = None
-#                 try: response = requests.get(f'https://lingva.ml/api/v1/en/bn/{word_text.strip().lower()}')
-#                 except: pass
-#                 if response != None:
-#                     if response.status_code:
-#                         meanings = [{'text': response.json()['translation']}]
-#                         is_own_source = False
-#                 else:
-#                     meanings = [{'text': 'দুঃখিত, আপাতত ইন্টারনেট সংযোগ নেই।'}]
-#                     is_own_source = False
-#         return JsonResponse({'meanings': meanings, 'is_own_source': is_own_source})
-#     return render(request, html_path, context=context)
-
 
 @login_required(login_url=ghelp.nav_links(key='login')['link'])
 def get_single_passage(request, user_passage_id=None):

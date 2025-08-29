@@ -40,21 +40,20 @@
     <div id="add-word-div" class="container mt-3 d-block">
         <div class="row">
             <div class="col-12 col-md-9">
-                <form method="POST" action="{% url 'add-word' %}" class="row form-inline d-flex justify-content-between">
-                    {% csrf_token %}
-                    <input id="searchInput" class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="text" placeholder="New Word" required>
-                    <input class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="pronunciation" placeholder="Pronunciation">
-                    <input class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="meanings" placeholder="Meaning" required>
-                    <input class="rounded col-12 col-md-8" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" name="example" placeholder="Example">
-                    <select class="rounded col-6 col-md-2" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" name="difficult_level">
+                <div class="row d-flex justify-content-between">
+                    <input id="searchInput" class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" placeholder="New Word" required>
+                    <input id="pronunciation" class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" placeholder="Pronunciation">
+                    <input id="meanings" class="rounded col-4 col-md-4" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" placeholder="Meaning" required>
+                    <input id="example" class="rounded col-12 col-md-8" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;" type="text" placeholder="Example">
+                    <select id="difficult_level" class="rounded col-6 col-md-2" style="font-size: 15px; height: 25px; border: 1px solid #a3ada6;">
                         {% for level in levels %}
                             {% if level.is_complexity_level %}
                             <option value="{{ level.id }}">{{ level.text }}</option>
                             {% endif %}
                         {% endfor %}
                     </select>
-                    <button type="submit" style="height: 25px; padding: 0;" class="btn btn-sm rounded btn-primary col-6 col-md-2">Submit</button>
-                </form>
+                    <button type="button" onclick="addWord()" style="height: 25px; padding: 0;" class="btn btn-sm rounded btn-primary col-6 col-md-2">Submit</button>
+                </div>
             </div>
             <div class="col-12 col-md-3 d-flex justify-content-center">
                 <button id="view-details" type="button" class="rounded w-100" onclick="viewDetails()" style="background-color: #a3ada6; border: none; cursor: pointer;">View Details</button>
@@ -192,7 +191,10 @@
                                         <button id="buttonWordText${word.id}" type="button" onclick="editField('buttonWordText${word.id}', 'buttonSubmitWordText${word.id}', 'spanWordText${word.id}', 'inputWordText${word.id}')" style="border: none; background-color: transparent;"><i class="bi bi-pencil"></i></button>
                                     </div>
                                     <div class="btn-group-visibility d-flex align-items-center">
-                                        <button id="incrementRightPrediction-${word.id}" type="button" style="border: none; background-color: transparent;" onclick="incrementRightPrediction(${word.id})">+${word.right_prediction}</button>
+                                        <button id="incrementRightPrediction-${word.id}" type="button" style="font-size: 12px; border: none; background-color: transparent;" onclick="incrementRightPrediction(${word.id})">${word.right_prediction}</button>
+                                    </div>
+                                    <div class="btn-group-visibility d-flex align-items-center">
+                                        <button id="incrementWrongPrediction-${word.id}" type="button" style="font-size: 12px; color: red; border: none; background-color: transparent;" onclick="incrementWrongPrediction(${word.id})">${word.wrong_prediction}</button>
                                     </div>
                                 </form>
 
@@ -432,8 +434,8 @@
                     fetch(`/word/get-words/?complexity=${complexity}&keyword=${keyword}&search=${search}&meaning_search=${meaningSearch}&page=${pageNumber}&page_size=${data.data.words_per_page}`, {headers: {'X-Request-Type': 'Words-Level'}})
                     .then(response => response.json())
                     .then(data => {
-                        renderPagination(data.data.page_number, data.data.last_page);
                         wordsContainer.innerHTML = '';
+                        renderPagination(data.data.page_number, data.data.last_page);
                         const levelOptions = data.levels.filter(level => level.is_complexity_level) || [];
                         data.data.words.forEach(word => wordsContainer.appendChild(renderWordCard(word, levelOptions, makeShort, hideMeaning)));
                     })
@@ -524,7 +526,7 @@
         }
         function incrementRightPrediction(wordId) {
             const button = document.getElementById(`incrementRightPrediction-${wordId}`);
-            button.textContent = `+${parseInt(button.textContent) + 1}`;
+            button.textContent = parseInt(button.textContent) + 1;
             fetch(`http://127.0.0.1:8000/word/increment-right-prediction/${wordId}/`)
             .then(resp => resp.json())
             .then(data => {
@@ -537,6 +539,52 @@
                 throw error;
             });
 
+        }
+        function incrementWrongPrediction(wordId) {
+            const button = document.getElementById(`incrementWrongPrediction-${wordId}`);
+            button.textContent = parseInt(button.textContent) + 1;
+            fetch(`http://127.0.0.1:8000/word/increment-wrong-prediction/${wordId}/`)
+            .then(resp => resp.json())
+            .then(data => {
+                if(data.is_complexity_level_changed) {
+                    document.getElementById(`word-${wordId}`).classList.add('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+
+        }
+        function addWord() {
+            const text = document.getElementById('searchInput');
+            const pronunciation = document.getElementById('pronunciation');
+            const meanings = document.getElementById('meanings');
+            const example = document.getElementById('example');
+            const difficult_level = document.getElementById('difficult_level');
+
+            fetch(`/word/add-word/?text=${text.value}&pronunciation=${pronunciation.value}&meanings=${meanings.value}&example=${example.value}&difficult_level=${difficult_level.value}`)
+            .then(resp => resp.json())
+            .then(data => {
+                text.value = '';
+                pronunciation.value = '';
+                meanings.value = '';
+                example.value = '';
+                difficult_level.value = '1';
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+            fetchAndRenderWords(
+                getComplexity(),
+                getPageNumber(),
+                getChecked(),
+                getSearched(),
+                getMeaningSearch(),
+                makeShortStatus(),
+                meaningHideOrNot()
+            );
         }
         document.getElementById('newWordsSwitch').addEventListener('change', function() {
             fetchAndRenderWords(
