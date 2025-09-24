@@ -154,7 +154,6 @@ def reset_passage(request, user_passage_id=None):
 def get_single_passage(request, user_passage_id=None):
     html_path = 'dictionary/passage/single_passage.html'
     user_passage = MODELS_PASS.UserPassage.objects.get(id=user_passage_id)
-    
     context = {
         'title': 'Single Passage',
         'user': request.user,
@@ -176,6 +175,7 @@ def get_single_passage(request, user_passage_id=None):
         'user_settings': ghelp.get_user_settings(request.user),
         'levels': SR_WORD.ComplexityLevelSerializer(MODELS_WORD.ComplexityLevel.objects.all().order_by('difficulty_level'), many=True).data,
         'passage': user_passage,
+        'notes': passage_service.get_user_passage_notes(request, user_passage),
         'form': FORMS_PASS.CreatePassageNote(initial={
             'note': user_passage.note
         })

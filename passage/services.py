@@ -12,6 +12,11 @@ class PassageService:
         )
         return request.user.user_words.filter(**filter_dict).distinct().order_by('-id')
     
+    def get_user_passage_notes(self, request, user_passage):
+        return request.user.user_notes.filter(
+                note__note_passages__passage_id=user_passage.passage.id
+            ).distinct().order_by('-id')
+    
     def serialized_user_passage_words(self, words):
         return SR_WORD.UserWordSerializer(words, many=True).data
 

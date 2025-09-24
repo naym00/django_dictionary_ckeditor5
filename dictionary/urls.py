@@ -12,6 +12,7 @@ urlpatterns = [
     path('auth/', include('user_auth.urls')),
     path('passage/', include('passage.urls')),
     path('word/', include('word.urls')),
+    path('note/', include('note.urls')),
     path('word-meaning/', include('word_meaning.urls')),
     path('example/', include('example.urls')),
     path('settings/', include('settings.urls')),

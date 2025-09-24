@@ -2,6 +2,7 @@ from django.db import models
 from help.common.generic import ghelp
 from user import models as MODELS_USER
 from word import models as MODELS_WORD
+from note import models as MODELS_NOTE
 from help.choice import choice as CHOICE
 from django_ckeditor_5.fields import CKEditor5Field
 
@@ -27,6 +28,16 @@ class PassageWord(models.Model):
     
     class Meta:
         unique_together = [['word', 'passage']]
+    def __str__(self):
+        return f'{self.id} - {self.passage.title}'
+    
+class PassageNote(models.Model):
+    note = models.ForeignKey(MODELS_NOTE.Note, on_delete=models.CASCADE, related_name='note_passages')
+    passage = models.ForeignKey(Passage, on_delete=models.CASCADE, related_name='passage_notes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = [['note', 'passage']]
     def __str__(self):
         return f'{self.id} - {self.passage.title}'
 

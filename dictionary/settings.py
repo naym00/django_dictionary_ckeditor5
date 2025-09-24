@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'user_auth.apps.UserAuthConfig',
     'passage.apps.PassageConfig',
     'word.apps.WordConfig',
+    'note.apps.NoteConfig',
     'word_meaning.apps.WordMeaningConfig',
     'example.apps.ExampleConfig',
     'settings.apps.SettingsConfig'

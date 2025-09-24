@@ -1,4 +1,5 @@
 GENDER=['Male', 'Female', 'Other']
 STATUS=['Pending', 'Accepted', 'Rejected']
 AUDIENCE=['Public', 'Friend', 'Custom', 'Private']
+TEST=['Test 1', 'Test 2', 'Test 3', 'Test 4']
 USER_TYPE=['Admin', 'General']

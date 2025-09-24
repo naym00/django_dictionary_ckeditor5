@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+{% load passage_filters %}
+{% block title %}{{title}}{% endblock %}
+
+
+{% block navbar %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url nav_links.auth.home.name %}">{{nav_links.auth.home.level}}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.home.name %}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.words.name %}">{{nav_links.auth.words.level}}</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="passagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Passages</a>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="passagesDropdown">
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.view_passage.name %}">{{nav_links.auth.view_passage.level}}</a></li>
+                                <li><a class="dropdown-item" href="{% url nav_links.auth.add_passage.name %}">{{nav_links.auth.add_passage.level}}</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.settings.name %}">{{nav_links.auth.settings.level}}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.auth.logout.name %}">{{nav_links.auth.logout.level}}</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.home.name %}">{{nav_links.unauth.home.level}}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.login.name %}">{{nav_links.unauth.login.level}}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url nav_links.unauth.register.name %}">{{nav_links.unauth.register.level}}</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+
+
+{% block body %}
+    {% if user.is_authenticated  %}
+
+
+
+
+        <div class="container my-5">
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <h1 class="display-4 mb-3">IELTS Books Collection</h1>
+                    <p class="lead">Select a book to view its reading passages</p>
+                </div>
+            </div>
+
+            <div class="accordion" id="booksAccordion">
+                <!-- IELTS Book 14 -->
+                <div class="accordion-item book-card">
+                    <h2 class="accordion-header" id="headingFourteen">
+                        <button class="accordion-button collapsed book-header" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFourteen" aria-expanded="false" aria-controls="collapseFourteen">
+                            <i class="fas fa-book book-icon"></i> IELTS Book 14
+                        </button>
+                    </h2>
+                    <div id="collapseFourteen" class="accordion-collapse collapse" aria-labelledby="headingFourteen" data-bs-parent="#booksAccordion">
+                        <div class="accordion-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 1</h5>
+                                            <p class="card-text">The importance of urban planning in modern cities</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2023-05-12</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 2</h5>
+                                            <p class="card-text">Climate change and its impact on marine life</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2023-05-14</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 3</h5>
+                                            <p class="card-text">The evolution of human language and communication</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2023-05-16</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IELTS Book 13 -->
+                <div class="accordion-item book-card">
+                    <h2 class="accordion-header" id="headingThirteen">
+                        <button class="accordion-button collapsed book-header" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThirteen" aria-expanded="false" aria-controls="collapseThirteen">
+                            <i class="fas fa-book book-icon"></i> IELTS Book 13
+                        </button>
+                    </h2>
+                    <div id="collapseThirteen" class="accordion-collapse collapse" aria-labelledby="headingThirteen" data-bs-parent="#booksAccordion">
+                        <div class="accordion-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 1</h5>
+                                            <p class="card-text">Artificial intelligence in healthcare</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2022-11-05</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 2</h5>
+                                            <p class="card-text">Renewable energy sources and sustainability</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2022-11-08</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 3</h5>
+                                            <p class="card-text">The psychology of consumer behavior</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2022-11-12</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IELTS Book 12 -->
+                <div class="accordion-item book-card">
+                    <h2 class="accordion-header" id="headingTwelve">
+                        <button class="accordion-button collapsed book-header" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwelve" aria-expanded="false" aria-controls="collapseTwelve">
+                            <i class="fas fa-book book-icon"></i> IELTS Book 12
+                        </button>
+                    </h2>
+                    <div id="collapseTwelve" class="accordion-collapse collapse" aria-labelledby="headingTwelve" data-bs-parent="#booksAccordion">
+                        <div class="accordion-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 1</h5>
+                                            <p class="card-text">The history of cinema and its cultural impact</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2022-03-15</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 2</h5>
+                                            <p class="card-text">Biodiversity in tropical rainforests</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2022-03-18</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 3</h5>
+                                            <p class="card-text">The future of space exploration</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2022-03-22</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IELTS Book 11 -->
+                <div class="accordion-item book-card">
+                    <h2 class="accordion-header" id="headingEleven">
+                        <button class="accordion-button collapsed book-header" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEleven" aria-expanded="false" aria-controls="collapseEleven">
+                            <i class="fas fa-book book-icon"></i> IELTS Book 11
+                        </button>
+                    </h2>
+                    <div id="collapseEleven" class="accordion-collapse collapse" aria-labelledby="headingEleven" data-bs-parent="#booksAccordion">
+                        <div class="accordion-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 1</h5>
+                                            <p class="card-text">The development of modern transportation systems</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2021-08-10</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 2</h5>
+                                            <p class="card-text">The impact of social media on communication</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2021-08-14</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 3</h5>
+                                            <p class="card-text">Traditional medicine vs modern healthcare</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2021-08-18</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IELTS Book 10 -->
+                <div class="accordion-item book-card">
+                    <h2 class="accordion-header" id="headingTen">
+                        <button class="accordion-button collapsed book-header" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTen" aria-expanded="false" aria-controls="collapseTen">
+                            <i class="fas fa-book book-icon"></i> IELTS Book 10
+                        </button>
+                    </h2>
+                    <div id="collapseTen" class="accordion-collapse collapse" aria-labelledby="headingTen" data-bs-parent="#booksAccordion">
+                        <div class="accordion-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 1</h5>
+                                            <p class="card-text">The history of the printing press</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2021-02-05</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 2</h5>
+                                            <p class="card-text">Marine ecosystems and conservation efforts</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2021-02-10</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card passage-item">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-file-alt passage-icon"></i>Passage 3</h5>
+                                            <p class="card-text">The neuroscience of learning and memory</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-date bg-secondary">2021-02-15</span>
+                                                <a href="#" class="btn btn-sm view-btn">View <i class="fas fa-eye ms-1"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        
+    {% else %}
+        <h1>Login First</h1>
+    {% endif %}
+
+    <style>
+        .book-card {
+            margin-bottom: 1rem;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        .book-header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 1rem;
+            cursor: pointer;
+        }
+        .passage-item {
+            border-left: 4px solid #6a11cb;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .passage-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+        .badge-date {
+            background-color: #6c757d;
+        }
+        .view-btn {
+            background-color: #6a11cb;
+            border: none;
+            padding: 0.25rem 0.75rem;
+        }
+        .view-btn:hover {
+            background-color: #2575fc;
+        }
+        .book-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        .passage-icon {
+            color: #6a11cb;
+            margin-right: 8px;
+        }
+        .accordion-button:not(.collapsed) {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+        }
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(0,0,0,.125);
+        }
+    </style>
+{% endblock %}
